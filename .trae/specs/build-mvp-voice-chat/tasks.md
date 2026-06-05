@@ -229,45 +229,45 @@
 
 ## 阶段 8：前端 WebSocket 客户端
 
-### Task 28: 创建 WebSocket 客户端 🔴
-- [ ] SubTask 28.1: 创建 src/api/ws.js 文件（文件存在但内容为空）
-- [ ] SubTask 28.2: 定义 WebSocket URL 常量
-- [ ] SubTask 28.3: 导出 connectWebSocket 函数
-- [ ] SubTask 28.4: 实现 WebSocket 事件处理（onopen, onmessage, onclose, onerror）
-- [ ] SubTask 28.5: 导出 sendMessage 函数
-- [ ] SubTask 28.6: 实现回调注册机制
+### Task 28: 创建 WebSocket 客户端 ✅
+- [x] SubTask 28.1: 创建 src/api/ws.js 文件（文件存在但内容为空）
+- [x] SubTask 28.2: 定义 WebSocket URL 常量
+- [x] SubTask 28.3: 导出 connectWebSocket 函数
+- [x] SubTask 28.4: 实现 WebSocket 事件处理（onopen, onmessage, onclose, onerror）
+- [x] SubTask 28.5: 导出 sendMessage 函数
+- [x] SubTask 28.6: 实现回调注册机制
 
 ---
 
 ## 阶段 9：前端状态管理
 
-### Task 29: 创建 Pinia Store 🔴
-- [ ] SubTask 29.1: 创建 src/store/chat.js 文件（文件存在但内容为空）
-- [ ] SubTask 29.2: 定义 messages 状态
-- [ ] SubTask 29.3: 定义 isConnected / isRecording / isProcessing / isPlaying 状态
-- [ ] SubTask 29.4: 定义 error 状态
-- [ ] SubTask 29.5: 实现 addMessage / setConnected / setRecording 等方法
-- [ ] SubTask 29.6: 实现 setError / clearError 方法
+### Task 29: 创建 Pinia Store ✅
+- [x] SubTask 29.1: 创建 src/store/chat.js 文件（文件存在但内容为空）
+- [x] SubTask 29.2: 定义 messages 状态
+- [x] SubTask 29.3: 定义 isConnected / isRecording / isProcessing / isPlaying 状态
+- [x] SubTask 29.4: 定义 error 状态
+- [x] SubTask 29.5: 实现 addMessage / setConnected / setRecording 等方法
+- [x] SubTask 29.6: 实现 setError / clearError 方法
 
 ---
 
 ## 阶段 10：前端录音功能
 
-### Task 30: 创建录音 Hook 🔴
-- [ ] SubTask 30.1: 创建 src/composables/useRecorder.js 文件（文件存在但内容为空）
-- [ ] SubTask 30.2: 实现 requestPermission 函数（获取麦克风权限）
-- [ ] SubTask 30.3: 实现 startRecording 函数
-- [ ] SubTask 30.4: 实现 stopRecording 函数
-- [ ] SubTask 30.5: 实现 blobToBase64 函数
+### Task 30: 创建录音 Hook ✅
+- [x] SubTask 30.1: 创建 src/composables/useRecorder.js 文件（文件存在但内容为空）
+- [x] SubTask 30.2: 实现 requestPermission 函数（获取麦克风权限）
+- [x] SubTask 30.3: 实现 startRecording 函数
+- [x] SubTask 30.4: 实现 stopRecording 函数
+- [x] SubTask 30.5: 实现 blobToBase64 函数
 
 ---
 
 ## 阶段 11：前端播放功能
 
-### Task 31: 创建播放 Hook 🔴
-- [ ] SubTask 31.1: 创建 src/composables/usePlayer.js 文件（文件存在但内容为空）
-- [ ] SubTask 31.2: 实现 playAudio 函数
-- [ ] SubTask 31.3: 实现播放队列（addToQueue, clearQueue）
+### Task 31: 创建播放 Hook ✅
+- [x] SubTask 31.1: 创建 src/composables/usePlayer.js 文件（文件存在但内容为空）
+- [x] SubTask 31.2: 实现 playAudio 函数
+- [x] SubTask 31.3: 实现播放队列（addToQueue, clearQueue）
 
 ---
 
@@ -320,7 +320,7 @@
 
 # 当前状态总结
 
-## ✅ 已完成（23 项）
+## ✅ 已完成（27 项）
 | Task | 说明 |
 |------|------|
 | Task 1 | 后端目录结构 |
@@ -350,14 +350,14 @@
 | Task 25 | 前端项目配置（package.json, vite.config.js, index.html）|
 | Task 26 | 安装前端依赖 |
 | Task 27 | 更新 main.js |
+| Task 28 | WebSocket 客户端 ws.js |
+| Task 29 | Pinia Store chat.js |
+| Task 30 | 录音 Hook useRecorder.js |
+| Task 31 | 播放 Hook usePlayer.js |
 
-## 🔴 需要完成（11 项）
+## 🔴 需要完成（7 项）
 | Task | 说明 | 文件状态 |
 |------|------|----------|
-| Task 28 | WebSocket 客户端 ws.js | 文件存在但内容为空 |
-| Task 29 | Pinia Store chat.js | 文件存在但内容为空 |
-| Task 30 | 录音 Hook useRecorder.js | 文件存在但内容为空 |
-| Task 31 | 播放 Hook usePlayer.js | 文件存在但内容为空 |
 | Task 32 | 录音按钮 VoiceButton.vue | 文件存在但内容为空 |
 | Task 33 | 聊天面板 ChatPanel.vue | 文件存在但内容为空 |
 | Task 34 | 主页面 App.vue | 文件存在但内容为空 |
