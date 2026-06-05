@@ -68,68 +68,68 @@
 
 ## 阶段 3：后端 ASR 服务
 
-### Task 10: 创建 ASR 服务文件 🔴
-- [ ] SubTask 10.1: 创建 server/services/asr.js 文件（文件存在但内容为空）
-- [ ] SubTask 10.2: 导入 axios 模块
-- [ ] SubTask 10.3: 导入 config 模块
-- [ ] SubTask 10.4: 定义 SILICONFLOW_ASR_URL 常量
+### Task 10: 创建 ASR 服务文件 ✅
+- [x] SubTask 10.1: 创建 server/services/asr.js 文件（文件存在但内容为空）
+- [x] SubTask 10.2: 导入 axios 模块
+- [x] SubTask 10.3: 导入 config 模块
+- [x] SubTask 10.4: 定义 SILICONFLOW_ASR_URL 常量
 
-### Task 11: 实现 ASR API 调用函数
-- [ ] SubTask 11.1: 导出 recognizeSpeech 函数
-- [ ] SubTask 11.2: 定义函数签名（输入 audioBuffer，输出 text）
-- [ ] SubTask 11.3: 创建 FormData 对象
-- [ ] SubTask 11.4: 添加 audio 文件到 FormData
-- [ ] SubTask 11.5: 设置请求头（Authorization）
-- [ ] SubTask 11.6: 发送 POST 请求到 ASR API
-- [ ] SubTask 11.7: 解析 API 响应
-- [ ] SubTask 11.8: 提取识别的文字
-- [ ] SubTask 11.9: 返回文字结果
+### Task 11: 实现 ASR API 调用函数 ✅
+- [x] SubTask 11.1: 导出 recognizeSpeech 函数
+- [x] SubTask 11.2: 定义函数签名（输入 audioBuffer，输出 text）
+- [x] SubTask 11.3: 创建 FormData 对象
+- [x] SubTask 11.4: 添加 audio 文件到 FormData
+- [x] SubTask 11.5: 设置请求头（Authorization）
+- [x] SubTask 11.6: 发送 POST 请求到 ASR API
+- [x] SubTask 11.7: 解析 API 响应
+- [x] SubTask 11.8: 提取识别的文字
+- [x] SubTask 11.9: 返回文字结果
 
-### Task 12: 实现 ASR 错误处理
-- [ ] SubTask 12.1: 添加 try-catch 包裹 API 调用
-- [ ] SubTask 12.2: 捕获网络错误
-- [ ] SubTask 12.3: 捕获 API 错误响应
-- [ ] SubTask 12.4: 打印错误日志
-- [ ] SubTask 12.5: 抛出错误或返回 null
+### Task 12: 实现 ASR 错误处理 ✅
+- [x] SubTask 12.1: 添加 try-catch 包裹 API 调用
+- [x] SubTask 12.2: 捕获网络错误
+- [x] SubTask 12.3: 捕获 API 错误响应
+- [x] SubTask 12.4: 打印错误日志
+- [x] SubTask 12.5: 抛出错误或返回 null
 
 ---
 
 ## 阶段 4：后端 LLM 服务
 
-### Task 13: 创建 LLM 服务文件 🔴
-- [ ] SubTask 13.1: 创建 server/services/llm.js 文件（文件存在但内容为空）
-- [ ] SubTask 13.2: 导入 axios 模块
-- [ ] SubTask 13.3: 导入 config 模块
-- [ ] SubTask 13.4: 定义 SILICONFLOW_LLM_URL 常量
-- [ ] SubTask 13.5: 定义默认 system prompt
+### Task 13: 创建 LLM 服务文件 ✅
+- [x] SubTask 13.1: 创建 server/services/llm.js 文件（文件存在但内容为空）
+- [x] SubTask 13.2: 导入 axios 模块
+- [x] SubTask 13.3: 导入 config 模块
+- [x] SubTask 13.4: 定义 SILICONFLOW_LLM_URL 常量
+- [x] SubTask 13.5: 定义默认 system prompt
 
-### Task 14: 实现 LLM API 调用函数（非流式）
-- [ ] SubTask 14.1: 导出 generateReply 函数
-- [ ] SubTask 14.2: 定义函数签名（输入 messages 数组，输出 text）
-- [ ] SubTask 14.3: 构建请求体（model, messages, stream: false）
-- [ ] SubTask 14.4: 设置请求头（Authorization, Content-Type）
-- [ ] SubTask 14.5: 发送 POST 请求到 LLM API
-- [ ] SubTask 14.6: 解析 API 响应
-- [ ] SubTask 14.7: 提取生成的文字
-- [ ] SubTask 14.8: 返回文字结果
+### Task 14: 实现 LLM API 调用函数（非流式） ✅
+- [x] SubTask 14.1: 导出 generateReply 函数
+- [x] SubTask 14.2: 定义函数签名（输入 messages 数组，输出 text）
+- [x] SubTask 14.3: 构建请求体（model, messages, stream: false）
+- [x] SubTask 14.4: 设置请求头（Authorization, Content-Type）
+- [x] SubTask 14.5: 发送 POST 请求到 LLM API
+- [x] SubTask 14.6: 解析 API 响应
+- [x] SubTask 14.7: 提取生成的文字
+- [x] SubTask 14.8: 返回文字结果
 
-### Task 15: 实现 LLM 流式返回
-- [ ] SubTask 15.1: 导出 generateReplyStream 函数
-- [ ] SubTask 15.2: 定义函数签名（输入 messages 数组，输出 AsyncGenerator）
-- [ ] SubTask 15.3: 构建请求体（model, messages, stream: true）
-- [ ] SubTask 15.4: 发送 POST 请求（responseType: 'stream'）
-- [ ] SubTask 15.5: 处理流式响应（SSE 格式）
-- [ ] SubTask 15.6: 解析每个 data: 行
-- [ ] SubTask 15.7: 提取增量文字
-- [ ] SubTask 15.8: yield 每个增量文字
-- [ ] SubTask 15.9: 处理 [DONE] 标记
+### Task 15: 实现 LLM 流式返回 ✅
+- [x] SubTask 15.1: 导出 generateReplyStream 函数
+- [x] SubTask 15.2: 定义函数签名（输入 messages 数组，输出 AsyncGenerator）
+- [x] SubTask 15.3: 构建请求体（model, messages, stream: true）
+- [x] SubTask 15.4: 发送 POST 请求（responseType: 'stream'）
+- [x] SubTask 15.5: 处理流式响应（SSE 格式）
+- [x] SubTask 15.6: 解析每个 data: 行
+- [x] SubTask 15.7: 提取增量文字
+- [x] SubTask 15.8: yield 每个增量文字
+- [x] SubTask 15.9: 处理 [DONE] 标记
 
-### Task 16: 实现 LLM 错误处理
-- [ ] SubTask 16.1: 添加 try-catch 包裹 API 调用
-- [ ] SubTask 16.2: 捕获网络错误
-- [ ] SubTask 16.3: 捕获 API 错误响应
-- [ ] SubTask 16.4: 打印错误日志
-- [ ] SubTask 16.5: 抛出错误或返回 null
+### Task 16: 实现 LLM 错误处理 ✅
+- [x] SubTask 16.1: 添加 try-catch 包裹 API 调用
+- [x] SubTask 16.2: 捕获网络错误
+- [x] SubTask 16.3: 捕获 API 错误响应
+- [x] SubTask 16.4: 打印错误日志
+- [x] SubTask 16.5: 抛出错误或返回 null
 
 ---
 
@@ -320,7 +320,7 @@
 
 # 当前状态总结
 
-## ✅ 已完成（9 项）
+## ✅ 已完成（14 项）
 | Task | 说明 |
 |------|------|
 | Task 1 | 后端目录结构 |
@@ -331,14 +331,19 @@
 | Task 6 | 创建配置模块 config.js |
 | Task 7 | 音频工具 - base64ToBuffer |
 | Task 8 | 音频工具 - bufferToBase64 |
+| Task 9 | 音频工具 createWavHeader |
+| Task 10 | ASR 服务文件 asr.js |
+| Task 11 | ASR API 调用函数 recognizeSpeech |
+| Task 13 | 创建 LLM 服务文件 |
+| Task 14 | LLM API 调用函数 generateReply |
+| Task 15 | LLM 流式返回 generateReplyStream |
 | Task 25 | 前端项目配置（package.json, vite.config.js, index.html）|
 
-## 🔴 需要完成（28 项）
+## 🔴 需要完成（23 项）
 | Task | 说明 | 文件状态 |
 |------|------|----------|
-| Task 9 | 音频工具 createWavHeader | 文件存在但内容为空 |
-| Task 10-12 | ASR 服务 asr.js | 文件存在但内容为空 |
-| Task 13-16 | LLM 服务 llm.js | 文件存在但内容为空 |
+| Task 12 | ASR 错误处理 | asr.js 已有基础结构 |
+| Task 16 | LLM 错误处理 | llm.js 已有基础结构 |
 | Task 17-19 | TTS 服务 tts.js | 文件存在但内容为空 |
 | Task 20-24 | WebSocket 服务器 ws.js | 文件存在但内容为空 |
 | Task 26 | 安装前端依赖 | node_modules 不存在 |
