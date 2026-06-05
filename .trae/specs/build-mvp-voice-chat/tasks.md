@@ -135,27 +135,27 @@
 
 ## 阶段 5：后端 TTS 服务
 
-### Task 17: 创建 TTS 服务文件 🔴
-- [ ] SubTask 17.1: 创建 server/services/tts.js 文件（文件存在但内容为空）
-- [ ] SubTask 17.2: 导入 axios 模块
-- [ ] SubTask 17.3: 导入 config 模块
-- [ ] SubTask 17.4: 定义 SILICONFLOW_TTS_URL 常量
+### Task 17: 创建 TTS 服务文件 ✅
+- [x] SubTask 17.1: 创建 server/services/tts.js 文件（文件存在但内容为空）
+- [x] SubTask 17.2: 导入 axios 模块
+- [x] SubTask 17.3: 导入 config 模块
+- [x] SubTask 17.4: 定义 SILICONFLOW_TTS_URL 常量
 
-### Task 18: 实现 TTS API 调用函数
-- [ ] SubTask 18.1: 导出 synthesizeSpeech 函数
-- [ ] SubTask 18.2: 定义函数签名（输入 text，输出 audioBuffer）
-- [ ] SubTask 18.3: 构建请求体（model, input, voice）
-- [ ] SubTask 18.4: 设置请求头（Authorization, Content-Type）
-- [ ] SubTask 18.5: 发送 POST 请求（responseType: 'arraybuffer'）
-- [ ] SubTask 18.6: 将响应数据转换为 Buffer
-- [ ] SubTask 18.7: 返回音频 Buffer
+### Task 18: 实现 TTS API 调用函数 ✅
+- [x] SubTask 18.1: 导出 synthesizeSpeech 函数
+- [x] SubTask 18.2: 定义函数签名（输入 text，输出 audioBuffer）
+- [x] SubTask 18.3: 构建请求体（model, input, voice）
+- [x] SubTask 18.4: 设置请求头（Authorization, Content-Type）
+- [x] SubTask 18.5: 发送 POST 请求（responseType: 'arraybuffer'）
+- [x] SubTask 18.6: 将响应数据转换为 Buffer
+- [x] SubTask 18.7: 返回音频 Buffer
 
-### Task 19: 实现 TTS 错误处理
-- [ ] SubTask 19.1: 添加 try-catch 包裹 API 调用
-- [ ] SubTask 19.2: 捕获网络错误
-- [ ] SubTask 19.3: 捕获 API 错误响应
-- [ ] SubTask 19.4: 打印错误日志
-- [ ] SubTask 19.5: 抛出错误或返回 null
+### Task 19: 实现 TTS 错误处理 ✅
+- [x] SubTask 19.1: 添加 try-catch 包裹 API 调用
+- [x] SubTask 19.2: 捕获网络错误
+- [x] SubTask 19.3: 捕获 API 错误响应
+- [x] SubTask 19.4: 打印错误日志
+- [x] SubTask 19.5: 抛出错误或返回 null
 
 ---
 
@@ -320,7 +320,7 @@
 
 # 当前状态总结
 
-## ✅ 已完成（14 项）
+## ✅ 已完成（17 项）
 | Task | 说明 |
 |------|------|
 | Task 1 | 后端目录结构 |
@@ -337,14 +337,17 @@
 | Task 13 | 创建 LLM 服务文件 |
 | Task 14 | LLM API 调用函数 generateReply |
 | Task 15 | LLM 流式返回 generateReplyStream |
+| Task 17 | TTS 服务文件 tts.js |
+| Task 18 | TTS API 调用函数 synthesizeSpeech |
+| Task 19 | TTS 错误处理 |
 | Task 25 | 前端项目配置（package.json, vite.config.js, index.html）|
 
-## 🔴 需要完成（23 项）
+## 🔴 需要完成（20 项）
 | Task | 说明 | 文件状态 |
 |------|------|----------|
 | Task 12 | ASR 错误处理 | asr.js 已有基础结构 |
 | Task 16 | LLM 错误处理 | llm.js 已有基础结构 |
-| Task 17-19 | TTS 服务 tts.js | 文件存在但内容为空 |
+| Task 19 | TTS 错误处理 | tts.js 已有基础结构 |
 | Task 20-24 | WebSocket 服务器 ws.js | 文件存在但内容为空 |
 | Task 26 | 安装前端依赖 | node_modules 不存在 |
 | Task 27 | 更新 main.js | 文件存在但内容为空 |
