@@ -212,18 +212,18 @@
 - [x] SubTask 25.2: 创建 vite.config.js（含 WebSocket 代理）
 - [x] SubTask 25.3: 创建 index.html 入口文件
 
-### Task 26: 安装前端依赖 🔴
-- [ ] SubTask 26.1: 在根目录运行 npm install
-- [ ] SubTask 26.2: 验证 node_modules 目录创建成功
-- [ ] SubTask 26.3: 验证 package.json 中添加了 pinia 依赖
+### Task 26: 安装前端依赖 ✅
+- [x] SubTask 26.1: 在根目录运行 npm install
+- [x] SubTask 26.2: 验证 node_modules 目录创建成功
+- [x] SubTask 26.3: 验证 package.json 中添加了 pinia 依赖
 
-### Task 27: 更新 main.js 🔴
-- [ ] SubTask 27.1: 导入 createApp（文件存在但内容为空）
-- [ ] SubTask 27.2: 导入 createPinia
-- [ ] SubTask 27.3: 导入 App 组件
-- [ ] SubTask 27.4: 创建 Vue 应用
-- [ ] SubTask 27.5: 使用 Pinia 插件
-- [ ] SubTask 27.6: 挂载应用
+### Task 27: 更新 main.js ✅
+- [x] SubTask 27.1: 导入 createApp（文件存在但内容为空）
+- [x] SubTask 27.2: 导入 createPinia
+- [x] SubTask 27.3: 导入 App 组件
+- [x] SubTask 27.4: 创建 Vue 应用
+- [x] SubTask 27.5: 使用 Pinia 插件
+- [x] SubTask 27.6: 挂载应用
 
 ---
 
@@ -320,7 +320,7 @@
 
 # 当前状态总结
 
-## ✅ 已完成（22 项）
+## ✅ 已完成（23 项）
 | Task | 说明 |
 |------|------|
 | Task 1 | 后端目录结构 |
@@ -348,12 +348,12 @@
 | Task 23 | WebSocket 消息解析与路由 |
 | Task 24 | ASR → LLM → TTS 完整流程 |
 | Task 25 | 前端项目配置（package.json, vite.config.js, index.html）|
+| Task 26 | 安装前端依赖 |
+| Task 27 | 更新 main.js |
 
-## 🔴 需要完成（13 项）
+## 🔴 需要完成（11 项）
 | Task | 说明 | 文件状态 |
 |------|------|----------|
-| Task 26 | 安装前端依赖 | node_modules 不存在 |
-| Task 27 | 更新 main.js | 文件存在但内容为空 |
 | Task 28 | WebSocket 客户端 ws.js | 文件存在但内容为空 |
 | Task 29 | Pinia Store chat.js | 文件存在但内容为空 |
 | Task 30 | 录音 Hook useRecorder.js | 文件存在但内容为空 |
