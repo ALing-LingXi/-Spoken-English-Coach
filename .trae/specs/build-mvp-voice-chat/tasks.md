@@ -161,47 +161,47 @@
 
 ## 阶段 6：后端 WebSocket 服务器
 
-### Task 20: 创建 WebSocket 服务器文件 🔴
-- [ ] SubTask 20.1: 创建 server/ws.js 文件（文件存在但内容为空）
-- [ ] SubTask 20.2: 导入 ws 模块
-- [ ] SubTask 20.3: 导入 WebSocketServer 类
-- [ ] SubTask 20.4: 导出 createWebSocketServer 函数
+### Task 20: 创建 WebSocket 服务器文件 ✅
+- [x] SubTask 20.1: 创建 server/ws.js 文件（文件存在但内容为空）
+- [x] SubTask 20.2: 导入 ws 模块
+- [x] SubTask 20.3: 导入 WebSocketServer 类
+- [x] SubTask 20.4: 导出 createWebSocketServer 函数
 
-### Task 21: 初始化 WebSocket 服务器
-- [ ] SubTask 21.1: 实现 createWebSocketServer 函数
-- [ ] SubTask 21.2: 创建 WebSocketServer 实例（传入 server）
-- [ ] SubTask 21.3: 监听 connection 事件
-- [ ] SubTask 21.4: 打印客户端连接日志
-- [ ] SubTask 21.5: 在 index.js 中调用 createWebSocketServer
-- [ ] SubTask 21.6: 启动服务器验证 WebSocket 可以正常创建
+### Task 21: 初始化 WebSocket 服务器 ✅
+- [x] SubTask 21.1: 实现 createWebSocketServer 函数
+- [x] SubTask 21.2: 创建 WebSocketServer 实例（传入 server）
+- [x] SubTask 21.3: 监听 connection 事件
+- [x] SubTask 21.4: 打印客户端连接日志
+- [x] SubTask 21.5: 在 index.js 中调用 createWebSocketServer
+- [x] SubTask 21.6: 启动服务器验证 WebSocket 可以正常创建
 
-### Task 22: 实现 WebSocket 连接处理
-- [ ] SubTask 22.1: 在 connection 回调中获取 ws 对象
-- [ ] SubTask 22.2: 监听 message 事件
-- [ ] SubTask 22.3: 监听 close 事件
-- [ ] SubTask 22.4: 监听 error 事件
-- [ ] SubTask 22.5: 打印客户端断开连接日志
-- [ ] SubTask 22.6: 打印错误日志
+### Task 22: 实现 WebSocket 连接处理 ✅
+- [x] SubTask 22.1: 在 connection 回调中获取 ws 对象
+- [x] SubTask 22.2: 监听 message 事件
+- [x] SubTask 22.3: 监听 close 事件
+- [x] SubTask 22.4: 监听 error 事件
+- [x] SubTask 22.5: 打印客户端断开连接日志
+- [x] SubTask 22.6: 打印错误日志
 
-### Task 23: 实现 WebSocket 消息解析与路由
-- [ ] SubTask 23.1: 在 message 回调中解析 JSON 数据
-- [ ] SubTask 23.2: 提取 type 字段
-- [ ] SubTask 23.3: 根据 type 分发到不同处理函数
-- [ ] SubTask 23.4: 创建 sendMessage 辅助函数
-- [ ] SubTask 23.5: 实现 'audio' 类型处理
-- [ ] SubTask 23.6: 处理 JSON 解析错误
+### Task 23: 实现 WebSocket 消息解析与路由 ✅
+- [x] SubTask 23.1: 在 message 回调中解析 JSON 数据
+- [x] SubTask 23.2: 提取 type 字段
+- [x] SubTask 23.3: 根据 type 分发到不同处理函数
+- [x] SubTask 23.4: 创建 sendMessage 辅助函数
+- [x] SubTask 23.5: 实现 'audio' 类型处理
+- [x] SubTask 23.6: 处理 JSON 解析错误
 
-### Task 24: 实现 ASR → LLM → TTS 完整流程
-- [ ] SubTask 24.1: 在 'audio' 类型处理中提取音频数据
-- [ ] SubTask 24.2: 将 base64 音频转换为 Buffer
-- [ ] SubTask 24.3: 调用 ASR 服务识别文字
-- [ ] SubTask 24.4: 发送 'transcript' 消息返回识别结果
-- [ ] SubTask 24.5: 调用 LLM 服务生成回复（流式）
-- [ ] SubTask 24.6: 对每个增量文字发送 'llm_chunk' 消息
-- [ ] SubTask 24.7: 流结束后调用 TTS 服务
-- [ ] SubTask 24.8: 将 TTS 音频 Buffer 转换为 base64
-- [ ] SubTask 24.9: 发送 'audio' 消息返回音频数据
-- [ ] SubTask 24.10: 处理各环节错误
+### Task 24: 实现 ASR → LLM → TTS 完整流程 ✅
+- [x] SubTask 24.1: 在 'audio' 类型处理中提取音频数据
+- [x] SubTask 24.2: 将 base64 音频转换为 Buffer
+- [x] SubTask 24.3: 调用 ASR 服务识别文字
+- [x] SubTask 24.4: 发送 'transcript' 消息返回识别结果
+- [x] SubTask 24.5: 调用 LLM 服务生成回复（流式）
+- [x] SubTask 24.6: 对每个增量文字发送 'llm_chunk' 消息
+- [x] SubTask 24.7: 流结束后调用 TTS 服务
+- [x] SubTask 24.8: 将 TTS 音频 Buffer 转换为 base64
+- [x] SubTask 24.9: 发送 'audio' 消息返回音频数据
+- [x] SubTask 24.10: 处理各环节错误
 
 ---
 
@@ -320,7 +320,7 @@
 
 # 当前状态总结
 
-## ✅ 已完成（17 项）
+## ✅ 已完成（22 项）
 | Task | 说明 |
 |------|------|
 | Task 1 | 后端目录结构 |
@@ -334,21 +334,24 @@
 | Task 9 | 音频工具 createWavHeader |
 | Task 10 | ASR 服务文件 asr.js |
 | Task 11 | ASR API 调用函数 recognizeSpeech |
+| Task 12 | ASR 错误处理 |
 | Task 13 | 创建 LLM 服务文件 |
 | Task 14 | LLM API 调用函数 generateReply |
 | Task 15 | LLM 流式返回 generateReplyStream |
+| Task 16 | LLM 错误处理 |
 | Task 17 | TTS 服务文件 tts.js |
 | Task 18 | TTS API 调用函数 synthesizeSpeech |
 | Task 19 | TTS 错误处理 |
+| Task 20 | WebSocket 服务器文件 ws.js |
+| Task 21 | 初始化 WebSocket 服务器 |
+| Task 22 | WebSocket 连接处理 |
+| Task 23 | WebSocket 消息解析与路由 |
+| Task 24 | ASR → LLM → TTS 完整流程 |
 | Task 25 | 前端项目配置（package.json, vite.config.js, index.html）|
 
-## 🔴 需要完成（20 项）
+## 🔴 需要完成（13 项）
 | Task | 说明 | 文件状态 |
 |------|------|----------|
-| Task 12 | ASR 错误处理 | asr.js 已有基础结构 |
-| Task 16 | LLM 错误处理 | llm.js 已有基础结构 |
-| Task 19 | TTS 错误处理 | tts.js 已有基础结构 |
-| Task 20-24 | WebSocket 服务器 ws.js | 文件存在但内容为空 |
 | Task 26 | 安装前端依赖 | node_modules 不存在 |
 | Task 27 | 更新 main.js | 文件存在但内容为空 |
 | Task 28 | WebSocket 客户端 ws.js | 文件存在但内容为空 |
@@ -358,7 +361,9 @@
 | Task 32 | 录音按钮 VoiceButton.vue | 文件存在但内容为空 |
 | Task 33 | 聊天面板 ChatPanel.vue | 文件存在但内容为空 |
 | Task 34 | 主页面 App.vue | 文件存在但内容为空 |
-| Task 35-37 | 集成测试 | 未开始 |
+| Task 35 | 后端集成测试 | 未开始 |
+| Task 36 | 前端集成测试 | 未开始 |
+| Task 37 | 端到端测试 | 未开始 |
 
 ---
 
