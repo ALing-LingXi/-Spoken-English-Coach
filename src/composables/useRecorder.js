@@ -11,7 +11,6 @@ export function useRecorder() {
   async function requestPermission() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      // 获取权限后立即释放，录音时再重新获取
       stream.getTracks().forEach(track => track.stop())
       return true
     } catch (err) {
@@ -26,7 +25,14 @@ export function useRecorder() {
     const hasPermission = await requestPermission()
     if (!hasPermission) return
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        sampleRate: 16000,
+        channelCount: 1,
+        echoCancellation: true,
+        noiseSuppression: true,
+      }
+    })
     mediaRecorder.value = new MediaRecorder(stream)
     audioChunks.value = []
 
@@ -40,7 +46,7 @@ export function useRecorder() {
     store.setRecording(true)
   }
 
-  /** 停止录音，返回 base64 音频数据 */
+  /** 停止录音，返回 base64 音频数据（WAV 格式） */
   function stopRecording() {
     return new Promise((resolve) => {
       if (!mediaRecorder.value || mediaRecorder.value.state === 'inactive') {
@@ -50,7 +56,6 @@ export function useRecorder() {
       }
 
       mediaRecorder.value.onstop = async () => {
-        // 释放麦克风
         mediaRecorder.value.stream.getTracks().forEach(track => track.stop())
         store.setRecording(false)
 
@@ -59,27 +64,74 @@ export function useRecorder() {
           return
         }
 
-        const blob = new Blob(audioChunks.value, { type: 'audio/webm' })
-        const base64 = await blobToBase64(blob)
-        resolve(base64)
+        const webmBlob = new Blob(audioChunks.value, { type: 'audio/webm' })
+        const wavBase64 = await webmToWavBase64(webmBlob)
+        resolve(wavBase64)
       }
 
       mediaRecorder.value.stop()
     })
   }
 
-  /** Blob 转 base64 字符串 */
-  function blobToBase64(blob) {
-    return new Promise((resolve) => {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        // 去掉 data:audio/webm;base64, 前缀
-        const base64 = reader.result.split(',')[1]
-        resolve(base64)
-      }
-      reader.readAsDataURL(blob)
-    })
+  /** 将 WebM Blob 转为 WAV 格式的 base64 */
+  async function webmToWavBase64(webmBlob) {
+    const arrayBuffer = await webmBlob.arrayBuffer()
+    const audioCtx = new AudioContext({ sampleRate: 16000 })
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer)
+    const wavBuffer = encodeWav(audioBuffer)
+    await audioCtx.close()
+    return arrayBufferToBase64(wavBuffer)
   }
 
-  return { requestPermission, startRecording, stopRecording, blobToBase64 }
+  /** 将 AudioBuffer 编码为 WAV 格式的 ArrayBuffer */
+  function encodeWav(audioBuffer) {
+    const numChannels = 1
+    const sampleRate = audioBuffer.sampleRate
+    const pcmData = audioBuffer.getChannelData(0)
+    const dataLength = pcmData.length * 2
+    const buffer = new ArrayBuffer(44 + dataLength)
+    const view = new DataView(buffer)
+
+    writeString(view, 0, 'RIFF')
+    view.setUint32(4, 36 + dataLength, true)
+    writeString(view, 8, 'WAVE')
+    writeString(view, 12, 'fmt ')
+    view.setUint32(16, 16, true)
+    view.setUint16(20, 1, true)
+    view.setUint16(22, numChannels, true)
+    view.setUint32(24, sampleRate, true)
+    view.setUint32(28, sampleRate * numChannels * 2, true)
+    view.setUint16(32, numChannels * 2, true)
+    view.setUint16(34, 16, true)
+    writeString(view, 36, 'data')
+    view.setUint32(40, dataLength, true)
+
+    let offset = 44
+    for (let i = 0; i < pcmData.length; i++) {
+      const sample = Math.max(-1, Math.min(1, pcmData[i]))
+      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true)
+      offset += 2
+    }
+
+    return buffer
+  }
+
+  /** 向 DataView 写入 ASCII 字符串 */
+  function writeString(view, offset, str) {
+    for (let i = 0; i < str.length; i++) {
+      view.setUint8(offset + i, str.charCodeAt(i))
+    }
+  }
+
+  /** ArrayBuffer 转 base64 字符串 */
+  function arrayBufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer)
+    let binary = ''
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i])
+    }
+    return btoa(binary)
+  }
+
+  return { requestPermission, startRecording, stopRecording }
 }

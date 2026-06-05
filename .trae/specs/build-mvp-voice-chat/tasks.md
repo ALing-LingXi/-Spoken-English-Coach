@@ -273,27 +273,27 @@
 
 ## 阶段 12：前端 UI 组件
 
-### Task 32: 创建录音按钮组件 🔴
-- [ ] SubTask 32.1: 创建 src/components/VoiceButton.vue 文件（文件存在但内容为空）
-- [ ] SubTask 32.2: 实现按住录音交互（mousedown/mouseup, touchstart/touchend）
-- [ ] SubTask 32.3: 添加极简样式
+### Task 32: 创建录音按钮组件 ✅
+- [x] SubTask 32.1: 创建 src/components/VoiceButton.vue 文件（文件存在但内容为空）
+- [x] SubTask 32.2: 实现按住录音交互（mousedown/mouseup, touchstart/touchend）
+- [x] SubTask 32.3: 添加极简样式
 
-### Task 33: 创建聊天面板组件 🔴
-- [ ] SubTask 33.1: 创建 src/components/ChatPanel.vue 文件（文件存在但内容为空）
-- [ ] SubTask 33.2: 使用 v-for 遍历 messages 显示对话记录
-- [ ] SubTask 33.3: 区分用户和 AI 消息样式
-- [ ] SubTask 33.4: 添加极简样式
+### Task 33: 创建聊天面板组件 ✅
+- [x] SubTask 33.1: 创建 src/components/ChatPanel.vue 文件（文件存在但内容为空）
+- [x] SubTask 33.2: 使用 v-for 遍历 messages 显示对话记录
+- [x] SubTask 33.3: 区分用户和 AI 消息样式
+- [x] SubTask 33.4: 添加极简样式
 
-### Task 34: 创建 App.vue 主页面 🔴
-- [ ] SubTask 34.1: 更新 src/App.vue 文件（文件存在但内容为空）
-- [ ] SubTask 34.2: 添加 ChatPanel 组件
-- [ ] SubTask 34.3: 添加 VoiceButton 组件
-- [ ] SubTask 34.4: 显示连接状态和错误信息
-- [ ] SubTask 34.5: 在 onMounted 中连接 WebSocket
-- [ ] SubTask 34.6: 注册 WebSocket 消息回调
-- [ ] SubTask 34.7: 实现 handleStart / handleStop 函数
-- [ ] SubTask 34.8: 实现 handleTranscript / handleLLMChunk / handleAudio 回调
-- [ ] SubTask 34.9: 添加极简布局样式
+### Task 34: 创建 App.vue 主页面 ✅
+- [x] SubTask 34.1: 更新 src/App.vue 文件（文件存在但内容为空）
+- [x] SubTask 34.2: 添加 ChatPanel 组件
+- [x] SubTask 34.3: 添加 VoiceButton 组件
+- [x] SubTask 34.4: 显示连接状态和错误信息
+- [x] SubTask 34.5: 在 onMounted 中连接 WebSocket
+- [x] SubTask 34.6: 注册 WebSocket 消息回调
+- [x] SubTask 34.7: 实现 handleStart / handleStop 函数
+- [x] SubTask 34.8: 实现 handleTranscript / handleLLMChunk / handleAudio 回调
+- [x] SubTask 34.9: 添加极简布局样式
 
 ---
 
@@ -320,7 +320,7 @@
 
 # 当前状态总结
 
-## ✅ 已完成（27 项）
+## ✅ 已完成（30 项）
 | Task | 说明 |
 |------|------|
 | Task 1 | 后端目录结构 |
@@ -354,13 +354,13 @@
 | Task 29 | Pinia Store chat.js |
 | Task 30 | 录音 Hook useRecorder.js |
 | Task 31 | 播放 Hook usePlayer.js |
+| Task 32 | 录音按钮 VoiceButton.vue |
+| Task 33 | 聊天面板 ChatPanel.vue |
+| Task 34 | 主页面 App.vue |
 
-## 🔴 需要完成（7 项）
+## 🔴 需要完成（4 项）
 | Task | 说明 | 文件状态 |
 |------|------|----------|
-| Task 32 | 录音按钮 VoiceButton.vue | 文件存在但内容为空 |
-| Task 33 | 聊天面板 ChatPanel.vue | 文件存在但内容为空 |
-| Task 34 | 主页面 App.vue | 文件存在但内容为空 |
 | Task 35 | 后端集成测试 | 未开始 |
 | Task 36 | 前端集成测试 | 未开始 |
 | Task 37 | 端到端测试 | 未开始 |

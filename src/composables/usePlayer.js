@@ -13,7 +13,7 @@ function base64ToAudioUrl(base64Str) {
   for (let i = 0; i < binaryStr.length; i++) {
     bytes[i] = binaryStr.charCodeAt(i)
   }
-  const blob = new Blob([bytes], { type: 'audio/wav' })
+  const blob = new Blob([bytes], { type: 'audio/mp3' })
   return URL.createObjectURL(blob)
 }
 
