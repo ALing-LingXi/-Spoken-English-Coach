@@ -42,27 +42,27 @@
 
 ## 阶段 2：后端配置和工具模块
 
-### Task 6: 创建配置模块 🔴
-- [ ] SubTask 6.1: 创建 server/config.js 文件（文件存在但内容为空）
-- [ ] SubTask 6.2: 导入 dotenv 模块
-- [ ] SubTask 6.3: 调用 dotenv.config()
-- [ ] SubTask 6.4: 导出 SILICONFLOW_API_KEY
-- [ ] SubTask 6.5: 导出 PORT（默认 3000）
-- [ ] SubTask 6.6: 导出 SILICONFLOW_BASE_URL
-- [ ] SubTask 6.7: 在 index.js 中导入 config 并打印配置验证
+### Task 6: 创建配置模块 ✅
+- [x] SubTask 6.1: 创建 server/config.js 文件（文件存在但内容为空）
+- [x] SubTask 6.2: 导入 dotenv 模块
+- [x] SubTask 6.3: 调用 dotenv.config()
+- [x] SubTask 6.4: 导出 SILICONFLOW_API_KEY
+- [x] SubTask 6.5: 导出 PORT（默认 3000）
+- [x] SubTask 6.6: 导出 SILICONFLOW_BASE_URL
+- [x] SubTask 6.7: 在 index.js 中导入 config 并打印配置验证
 
-### Task 7: 创建音频工具 - base64ToBuffer 🔴
-- [ ] SubTask 7.1: 创建 server/utils/audio.js 文件（文件存在但内容为空）
-- [ ] SubTask 7.2: 导出 base64ToBuffer 函数
-- [ ] SubTask 7.3: 实现 base64ToBuffer 函数（输入 base64 字符串，输出 Buffer）
+### Task 7: 创建音频工具 - base64ToBuffer ✅
+- [x] SubTask 7.1: 创建 server/utils/audio.js 文件（文件存在但内容为空）
+- [x] SubTask 7.2: 导出 base64ToBuffer 函数
+- [x] SubTask 7.3: 实现 base64ToBuffer 函数（输入 base64 字符串，输出 Buffer）
 
-### Task 8: 创建音频工具 - bufferToBase64 🔴
-- [ ] SubTask 8.1: 导出 bufferToBase64 函数
-- [ ] SubTask 8.2: 实现 bufferToBase64 函数（输入 Buffer，输出 base64 字符串）
+### Task 8: 创建音频工具 - bufferToBase64 ✅
+- [x] SubTask 8.1: 导出 bufferToBase64 函数
+- [x] SubTask 8.2: 实现 bufferToBase64 函数（输入 Buffer，输出 base64 字符串）
 
-### Task 9: 创建音频工具 - createWavHeader 🔴
-- [ ] SubTask 9.1: 导出 createWavHeader 函数
-- [ ] SubTask 9.2: 实现 createWavHeader 函数（输入音频数据长度，输出 44 字节 WAV 头）
+### Task 9: 创建音频工具 - createWavHeader ✅
+- [x] SubTask 9.1: 导出 createWavHeader 函数
+- [x] SubTask 9.2: 实现 createWavHeader 函数（输入音频数据长度，输出 44 字节 WAV 头）
 
 ---
 
@@ -320,7 +320,7 @@
 
 # 当前状态总结
 
-## ✅ 已完成（6 项）
+## ✅ 已完成（9 项）
 | Task | 说明 |
 |------|------|
 | Task 1 | 后端目录结构 |
@@ -328,13 +328,15 @@
 | Task 3 | 安装后端依赖 |
 | Task 4 | 创建 .env 和 .gitignore |
 | Task 5 | 创建入口文件 index.js |
+| Task 6 | 创建配置模块 config.js |
+| Task 7 | 音频工具 - base64ToBuffer |
+| Task 8 | 音频工具 - bufferToBase64 |
 | Task 25 | 前端项目配置（package.json, vite.config.js, index.html）|
 
-## 🔴 需要完成（31 项）
+## 🔴 需要完成（28 项）
 | Task | 说明 | 文件状态 |
 |------|------|----------|
-| Task 6 | 创建配置模块 config.js | 文件存在但内容为空 |
-| Task 7-9 | 音频工具函数 audio.js | 文件存在但内容为空 |
+| Task 9 | 音频工具 createWavHeader | 文件存在但内容为空 |
 | Task 10-12 | ASR 服务 asr.js | 文件存在但内容为空 |
 | Task 13-16 | LLM 服务 llm.js | 文件存在但内容为空 |
 | Task 17-19 | TTS 服务 tts.js | 文件存在但内容为空 |
