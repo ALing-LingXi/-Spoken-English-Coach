@@ -29,7 +29,11 @@
 
     <!-- 底部录音区域 -->
     <el-footer class="app__footer" height="auto">
-      <VoiceButton @start="handleStart" @stop="handleStop" />
+      <VoiceButton
+        :waveformData="waveformData"
+        @start="handleStart"
+        @stop="handleStop"
+      />
     </el-footer>
   </el-container>
 </template>
@@ -48,15 +52,19 @@ import VoiceButton from './components/VoiceButton.vue'
 const store = useChatStore()
 const { isConnected, error } = storeToRefs(store)
 const { setConnected, setProcessing, addMessage, setError, clearError } = store
-const { startRecording, stopRecording } = useRecorder()
-const { addToQueue, clearQueue } = usePlayer()
+const { startRecording, stopRecording, waveformData } = useRecorder()
+const { addToQueue, interrupt, stop: stopPlayer } = usePlayer()
 
 // 当前 AI 回复的缓冲
 let currentAiText = ''
 
-/** 按下录音 */
+/** 按下：打断播放或开始录音 */
 async function handleStart() {
-  clearQueue()
+  if (isConnected.value) {
+    // 打断当前播放
+    stopPlayer()
+    sendMessage('interrupt', {})
+  }
   await startRecording()
 }
 
@@ -93,6 +101,18 @@ function handleAudio(data) {
   setProcessing(false)
 }
 
+/** 处理纠错内容 */
+function handleCorrection(data) {
+  store.setCorrection(data.text)
+}
+
+/** 处理评分 */
+function handleScore(data) {
+  if (data.score) {
+    store.setScore(data.score, data.feedback || null)
+  }
+}
+
 /** 注册 WebSocket 回调 */
 function registerCallbacks() {
   on('open', () => setConnected(true))
@@ -100,6 +120,8 @@ function registerCallbacks() {
   on('transcript', handleTranscript)
   on('llm_chunk', handleLLMChunk)
   on('audio', handleAudio)
+  on('correction', handleCorrection)
+  on('score', handleScore)
   on('error', (data) => {
     setError(data?.message || '服务器错误')
     setProcessing(false)
@@ -116,7 +138,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  clearQueue()
+  stopPlayer()
 })
 </script>
 

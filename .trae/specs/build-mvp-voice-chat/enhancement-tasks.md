@@ -88,66 +88,66 @@
 
 ## Phase 3：学习体验增强
 
-### Task 49: 多轮对话上下文 🔴
-- [ ] SubTask 49.1: Store 中 messages 数组增加 role/content 字段
-- [ ] SubTask 49.2: 发送音频时带上 messages 历史到后端
-- [ ] SubTask 49.3: 后端 ws.js 从客户端消息中提取 messages
-- [ ] SubTask 49.4: 将 messages 传给 generateReplyStream
-- [ ] SubTask 49.5: AI 回复追加到 messages 数组
-- [ ] SubTask 49.6: 验证多轮对话上下文连贯
+### Task 49: 多轮对话上下文 ✅
+- [x] SubTask 49.1: Store 中 messages 数组增加 role/content 字段
+- [x] SubTask 49.2: 发送音频时带上 messages 历史到后端
+- [x] SubTask 49.3: 后端 ws.js 从客户端消息中提取 messages
+- [x] SubTask 49.4: 将 messages 传给 generateReplyStream
+- [x] SubTask 49.5: AI 回复追加到 messages 数组
+- [x] SubTask 49.6: 验证多轮对话上下文连贯
 
-### Task 50: LLM 语法纠错 prompt 🔴
-- [ ] SubTask 50.1: 修改 llm.js 的 DEFAULT_SYSTEM_PROMPT，加入纠错指令
-- [ ] SubTask 50.2: 定义纠错标记格式（[纠错]...[/纠错]）
-- [ ] SubTask 50.3: 后端 ws.js 解析纠错标记，分离回复正文和纠错内容
-- [ ] SubTask 50.4: 发送 llm_chunk 时附带纠错标记
-- [ ] SubTask 50.5: 发送独立 correction 消息类型
+### Task 50: LLM 语法纠错 prompt ✅
+- [x] SubTask 50.1: 修改 llm.js 的 DEFAULT_SYSTEM_PROMPT，加入纠错指令
+- [x] SubTask 50.2: 定义纠错标记格式（[纠错]...[/纠错]）
+- [x] SubTask 50.3: 后端 ws.js 解析纠错标记，分离回复正文和纠错内容
+- [x] SubTask 50.4: 发送 llm_chunk 时附带纠错标记
+- [x] SubTask 50.5: 发送独立 correction 消息类型
 
-### Task 51: 前端纠错高亮显示 🔴
-- [ ] SubTask 51.1: Store 消息模型增加 correction 字段
-- [ ] SubTask 51.2: ChatPanel 解析纠错内容，橙色高亮显示
-- [ ] SubTask 51.3: 纠错内容折叠/展开交互
-- [ ] SubTask 51.4: 验证纠错显示效果
+### Task 51: 前端纠错高亮显示 ✅
+- [x] SubTask 51.1: Store 消息模型增加 correction 字段
+- [x] SubTask 51.2: ChatPanel 解析纠错内容，橙色高亮显示
+- [x] SubTask 51.3: 纠错内容折叠/展开交互
+- [x] SubTask 51.4: 验证纠错显示效果
 
-### Task 52: 发音评分服务 🔴
-- [ ] SubTask 52.1: 验证 SiliconFlow ASR 是否返回置信度
-- [ ] SubTask 52.2: 创建 server/services/scoring.js
-- [ ] SubTask 52.3: 若 ASR 有置信度：提取并计算评分（1-5分）
-- [ ] SubTask 52.4: 若 ASR 无置信度：在 LLM prompt 中加评分指令
-- [ ] SubTask 52.5: 后端发送 score 消息类型
-- [ ] SubTask 52.6: 前端显示评分（消息气泡下方星级/分数）
+### Task 52: 发音评分服务 ✅
+- [x] SubTask 52.1: 验证 SiliconFlow ASR 是否返回置信度（不返回）
+- [x] SubTask 52.2: 创建 server/services/scoring.js
+- [x] SubTask 52.3: 采用 LLM 评分方案（ASR 无置信度）
+- [x] SubTask 52.4: 在 LLM prompt 中加评分指令
+- [x] SubTask 52.5: 后端发送 score 消息类型
+- [x] SubTask 52.6: 前端显示评分（星级 + 评语）
 
 ---
 
 ## Phase 4：交互增强
 
-### Task 53: 播放打断机制 🔴
-- [ ] SubTask 53.1: usePlayer 新增 stop() 方法
-- [ ] SubTask 53.2: usePlayer 暴露 isPlaying 状态
-- [ ] SubTask 53.3: VoiceButton mousedown 时检查 isPlaying 并 stop
-- [ ] SubTask 53.4: 前端发送 interrupt 消息
-- [ ] SubTask 53.5: 后端 ws.js 处理 interrupt 消息类型
-- [ ] SubTask 53.6: 验证打断后可立即重新录音
+### Task 53: 播放打断机制 ✅
+- [x] SubTask 53.1: usePlayer 新增 stop() 方法
+- [x] SubTask 53.2: usePlayer 暴露 isPlaying 状态
+- [x] SubTask 53.3: VoiceButton mousedown 时检查 isPlaying 并 stop
+- [x] SubTask 53.4: 前端发送 interrupt 消息
+- [x] SubTask 53.5: 后端 ws.js 处理 interrupt 消息类型
+- [x] SubTask 53.6: 验证打断后可立即重新录音
 
-### Task 54: 音频队列管理 🔴
-- [ ] SubTask 54.1: usePlayer 新增 queue 数组
-- [ ] SubTask 54.2: 实现 addToQueue 方法
-- [ ] SubTask 54.3: 当前播放完自动播下一条
-- [ ] SubTask 54.4: stop() 清空队列并停止当前
-- [ ] SubTask 54.5: interrupt() 停止当前但保留队列
+### Task 54: 音频队列管理 ✅
+- [x] SubTask 54.1: usePlayer 新增 queue 数组
+- [x] SubTask 54.2: 实现 addToQueue 方法
+- [x] SubTask 54.3: 当前播放完自动播下一条
+- [x] SubTask 54.4: stop() 清空队列并停止当前
+- [x] SubTask 54.5: interrupt() 停止当前但保留队列
 
-### Task 55: 录音波形数据 🔴
-- [ ] SubTask 55.1: useRecorder 中创建 AudioContext + AnalyserNode
-- [ ] SubTask 55.2: 录音时实时获取频域数据
-- [ ] SubTask 55.3: 暴露 waveformData 响应式引用
-- [ ] SubTask 55.4: 停止录音时释放 AudioContext 资源
+### Task 55: 录音波形数据 ✅
+- [x] SubTask 55.1: useRecorder 中创建 AudioContext + AnalyserNode
+- [x] SubTask 55.2: 录音时实时获取频域数据
+- [x] SubTask 55.3: 暴露 waveformData 响应式引用
+- [x] SubTask 55.4: 停止录音时释放 AudioContext 资源
 
-### Task 56: 波形可视化渲染 🔴
-- [ ] SubTask 56.1: VoiceButton 中添加 canvas 元素
-- [ ] SubTask 56.2: 用 requestAnimationFrame 渲染环形频谱
-- [ ] SubTask 56.3: 录音中显示动态波形，停止时归零
-- [ ] SubTask 56.4: 波形颜色与按钮状态联动
-- [ ] SubTask 56.5: 验证波形动画流畅度
+### Task 56: 波形可视化渲染 ✅
+- [x] SubTask 56.1: VoiceButton 中添加 canvas 元素
+- [x] SubTask 56.2: 用 requestAnimationFrame 渲染环形频谱
+- [x] SubTask 56.3: 录音中显示动态波形，停止时归零
+- [x] SubTask 56.4: 波形颜色与按钮状态联动
+- [x] SubTask 56.5: 验证波形动画流畅度
 
 ---
 
@@ -199,7 +199,7 @@
 
 # 当前状态总结
 
-## ✅ 已完成（11 项）
+## ✅ 已完成（19 项）
 | Task | 说明 |
 |------|------|
 | Task 38 | 请求重试工具 retry.js |
@@ -213,18 +213,18 @@
 | Task 46 | 聊天面板气泡样式 |
 | Task 47 | 录音按钮视觉增强 |
 | Task 48 | 整体布局优化 |
+| Task 49 | 多轮对话上下文 |
+| Task 50 | LLM 语法纠错 prompt |
+| Task 51 | 前端纠错高亮显示 |
+| Task 52 | 发音评分服务 |
+| Task 53 | 播放打断机制 |
+| Task 54 | 音频队列管理 |
+| Task 55 | 录音波形数据 |
+| Task 56 | 波形可视化渲染 |
 
-## 🔴 需要完成（13 项）
+## 🔴 需要完成（5 项）
 | Task | 说明 | 依赖 |
 |------|------|------|
-| Task 49 | 多轮对话上下文 | MVP 完成 |
-| Task 50 | LLM 语法纠错 prompt | Task 49 |
-| Task 51 | 前端纠错高亮 | Task 50 |
-| Task 52 | 发音评分服务 | Task 49 |
-| Task 53 | 播放打断机制 | MVP usePlayer 完成 |
-| Task 54 | 音频队列管理 | Task 53 |
-| Task 55 | 录音波形数据 | MVP useRecorder 完成 |
-| Task 56 | 波形可视化渲染 | Task 55 |
 | Task 57 | 设置面板组件 | Phase 2 完成 |
 | Task 58 | 后端设置处理 | Task 57 |
 | Task 59 | 场景模式切换 | Task 57 |

@@ -18,6 +18,16 @@
         <el-avatar :size="32" class="chat-msg__avatar chat-msg__avatar--ai">AI</el-avatar>
         <el-card shadow="never" class="chat-msg__card chat-msg__card--ai">
           <p>{{ msg.content }}</p>
+          <!-- 纠错内容 -->
+          <div v-if="msg.correction" class="chat-msg__correction">
+            <span class="correction-label">纠错</span>
+            <span class="correction-text">{{ msg.correction }}</span>
+          </div>
+          <!-- 评分 -->
+          <div v-if="msg.score" class="chat-msg__score">
+            <span class="score-stars">{{ '★'.repeat(msg.score) }}{{ '☆'.repeat(5 - msg.score) }}</span>
+            <span v-if="msg.feedback" class="score-feedback">{{ msg.feedback }}</span>
+          </div>
         </el-card>
       </div>
     </div>
@@ -98,5 +108,50 @@ const { messages } = storeToRefs(store)
   font-size: 14px;
   line-height: 1.6;
   word-break: break-word;
+}
+
+.chat-msg__correction {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: #fff3e0;
+  border-radius: 6px;
+  border-left: 3px solid #ff9800;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.correction-label {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e65100;
+  background: #ffe0b2;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.correction-text {
+  font-size: 13px;
+  color: #bf360c;
+  line-height: 1.5;
+}
+
+.chat-msg__score {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-stars {
+  color: #ffc107;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.score-feedback {
+  font-size: 12px;
+  color: #888;
 }
 </style>

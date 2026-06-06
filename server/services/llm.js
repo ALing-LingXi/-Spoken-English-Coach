@@ -1,12 +1,21 @@
 const axios = require('axios');
 const config = require('../config');
 const { retry } = require('../utils/retry');
+const { getScoringPrompt } = require('./scoring');
 
 const SILICONFLOW_LLM_URL = `${config.SILICONFLOW_BASE_URL}/chat/completions`;
 
 const DEFAULT_SYSTEM_PROMPT = `你是一个友好的英语口语陪练助手。请用英语回复用户，保持对话自然流畅。
 如果用户用中文说话，用英语回复并适当纠正表达。
-回复尽量简短，每次2-3句话，鼓励用户继续对话。`;
+回复尽量简短，每次2-3句话，鼓励用户继续对话。
+
+【语法纠错规则】
+如果用户的英语有语法或表达错误，请在回复末尾用 [纠错]...[/纠错] 标注纠正内容。
+格式：[纠错]错误表达 → 正确表达（简要说明）[/纠错]
+示例：用户说 "I goes to school"，回复末尾加 [纠错]I goes → I go（主语I用动词原形）[/纠错]
+如果没有错误，不需要加纠错标记。
+
+${getScoringPrompt()}`;
 
 /**
  * 构建发送给 LLM 的请求体
