@@ -1,40 +1,44 @@
 <template>
   <div class="scene-selector">
-    <div
-      v-for="item in scenes"
-      :key="item.value"
-      class="scene-tab"
-      :class="{ active: currentScene === item.value }"
-      @click="selectScene(item.value)"
-    >
+    <div v-for="item in scenes" :key="item.value" class="scene-tab" :class="{ active: currentScene === item.value }"
+      @click="selectScene(item.value)">
       <span class="scene-icon">{{ item.icon }}</span>
       <span class="scene-label">{{ item.label }}</span>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue'
+import type { SceneType } from '@/types'
 
-const props = defineProps({
-  modelValue: { type: String, default: 'daily' },
-})
+const props = defineProps<{
+  modelValue: SceneType
+}>()
 
-const emit = defineEmits(['update:modelValue', 'change'])
+const emit = defineEmits<{
+  'update:modelValue': [value: SceneType]
+  change: [scene: SceneType]
+}>()
 
-const currentScene = ref(props.modelValue)
+const currentScene = ref<SceneType>(props.modelValue)
 
-// 同步外部 modelValue 变化
 watch(() => props.modelValue, (val) => { currentScene.value = val })
 
-const scenes = [
+interface SceneOption {
+  value: SceneType
+  label: string
+  icon: string
+}
+
+const scenes: SceneOption[] = [
   { value: 'daily', label: '日常', icon: '💬' },
   { value: 'business', label: '商务', icon: '💼' },
   { value: 'travel', label: '旅行', icon: '✈️' },
   { value: 'interview', label: '面试', icon: '🎯' },
 ]
 
-function selectScene(scene) {
+function selectScene(scene: SceneType): void {
   currentScene.value = scene
   emit('update:modelValue', scene)
   emit('change', scene)

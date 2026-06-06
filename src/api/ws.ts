@@ -1,56 +1,50 @@
+import type { WSMessageType, WSCallback, WSMessage } from '@/types'
+
 // WebSocket 连接地址（开发环境通过 Vite 代理）
 const WS_URL = `ws://${window.location.host}/ws`
 
-let socket = null
-const callbacks = {}
+let socket: WebSocket | null = null
+const callbacks: Partial<Record<WSMessageType, WSCallback>> = {}
 
 // 重连参数
 const MAX_RETRIES = 10
 const BASE_DELAY = 1000
 let retryCount = 0
-let reconnectTimer = null
+let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 
 // 心跳参数
 const HEARTBEAT_INTERVAL = 30000
 const HEARTBEAT_TIMEOUT = 10000
-let heartbeatTimer = null
-let heartbeatTimeoutTimer = null
+let heartbeatTimer: ReturnType<typeof setInterval> | null = null
+let heartbeatTimeoutTimer: ReturnType<typeof setTimeout> | null = null
 
-/**
- * 注册消息回调
- */
-function on(type, callback) {
+/** 注册消息回调 */
+function on(type: WSMessageType, callback: WSCallback): void {
   callbacks[type] = callback
 }
 
-/**
- * 触发已注册的回调
- */
-function emit(type, data) {
-  if (callbacks[type]) callbacks[type](data)
+/** 触发已注册的回调 */
+function emit(type: WSMessageType, data: unknown): void {
+  const cb = callbacks[type]
+  if (cb) cb(data)
 }
 
-/**
- * 启动心跳定时器
- */
-function startHeartbeat() {
+/** 启动心跳定时器 */
+function startHeartbeat(): void {
   stopHeartbeat()
   heartbeatTimer = setInterval(() => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({ type: 'ping', data: {} }))
-      // 启动超时检测
       heartbeatTimeoutTimer = setTimeout(() => {
         console.warn('[WS] 心跳超时，触发重连')
-        socket.close()
+        socket?.close()
       }, HEARTBEAT_TIMEOUT)
     }
   }, HEARTBEAT_INTERVAL)
 }
 
-/**
- * 停止心跳定时器
- */
-function stopHeartbeat() {
+/** 停止心跳定时器 */
+function stopHeartbeat(): void {
   if (heartbeatTimer) {
     clearInterval(heartbeatTimer)
     heartbeatTimer = null
@@ -61,20 +55,16 @@ function stopHeartbeat() {
   }
 }
 
-/**
- * 收到 pong 时重置超时
- */
-function handlePong() {
+/** 收到 pong 时重置超时 */
+function handlePong(): void {
   if (heartbeatTimeoutTimer) {
     clearTimeout(heartbeatTimeoutTimer)
     heartbeatTimeoutTimer = null
   }
 }
 
-/**
- * 连接 WebSocket 服务器
- */
-function connectWebSocket() {
+/** 连接 WebSocket 服务器 */
+function connectWebSocket(): Promise<WebSocket> {
   return new Promise((resolve, reject) => {
     socket = new WebSocket(WS_URL)
 
@@ -83,19 +73,19 @@ function connectWebSocket() {
       retryCount = 0
       emit('open', null)
       startHeartbeat()
-      resolve(socket)
+      resolve(socket!)
     }
 
-    socket.onmessage = (event) => {
+    socket.onmessage = (event: MessageEvent) => {
       try {
-        const { type, data } = JSON.parse(event.data)
-        if (type === 'pong') {
+        const msg = JSON.parse(event.data) as WSMessage
+        if (msg.type === 'pong') {
           handlePong()
           return
         }
-        emit(type, data)
+        emit(msg.type, msg.data)
       } catch (err) {
-        console.error('[WS] 消息解析失败:', err.message)
+        console.error('[WS] 消息解析失败:', (err as Error).message)
       }
     }
 
@@ -106,18 +96,16 @@ function connectWebSocket() {
       scheduleReconnect()
     }
 
-    socket.onerror = (err) => {
+    socket.onerror = () => {
       console.error('[WS] 连接错误')
-      emit('error', err)
-      reject(err)
+      emit('error', null)
+      reject(new Error('WebSocket 连接错误'))
     }
   })
 }
 
-/**
- * 指数退避重连
- */
-function scheduleReconnect() {
+/** 指数退避重连 */
+function scheduleReconnect(): void {
   if (retryCount >= MAX_RETRIES) {
     console.error('[WS] 达到最大重试次数，停止重连')
     emit('reconnect_failed', null)
@@ -135,10 +123,8 @@ function scheduleReconnect() {
   }, delay)
 }
 
-/**
- * 停止重连
- */
-function stopReconnect() {
+/** 停止重连 */
+function stopReconnect(): void {
   if (reconnectTimer) {
     clearTimeout(reconnectTimer)
     reconnectTimer = null
@@ -146,23 +132,19 @@ function stopReconnect() {
   retryCount = 0
 }
 
-/**
- * 发送消息到服务器
- */
-function sendMessage(type, data) {
+/** 发送消息到服务器 */
+function sendMessage(type: WSMessageType, data: unknown = {}): void {
   if (socket && socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify({ type, data }))
   }
 }
 
-/**
- * 主动断开连接（不重连）
- */
-function disconnect() {
+/** 主动断开连接（不重连） */
+function disconnect(): void {
   stopReconnect()
   stopHeartbeat()
   if (socket) {
-    socket.onclose = null // 防止触发重连
+    socket.onclose = null
     socket.close()
     socket = null
   }

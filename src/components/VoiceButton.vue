@@ -12,7 +12,7 @@
       'voice-btn--recording': isRecording,
       'voice-btn--processing': isProcessing && !isPlaying,
       'voice-btn--playing': isPlaying,
-    }" :disabled="isProcessing && !isPlaying" @mousedown="handleStart" @mouseup="handleStop" @mouseleave="handleStop"
+    }" :disabled="isProcessing && !isPlaying" @mousedown="handleStart" @mouseup="handleStop"
       @touchstart.prevent="handleStart" @touchend.prevent="handleStop">
       <svg v-if="!isRecording && !isProcessing && !isPlaying" width="28" height="28" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -35,13 +35,13 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useChatStore } from '../store/chat'
+import { useChatStore } from '@/store/chat'
 
 const props = defineProps({
   waveformData: { type: Object, default: () => new Uint8Array(0) },
 })
 
-const emit = defineEmits(['start', 'stop'])
+const emit = defineEmits(['start', 'stop', 'interrupt'])
 
 const store = useChatStore()
 const { isRecording, isProcessing, isPlaying } = storeToRefs(store)
@@ -58,7 +58,17 @@ const label = computed(() => {
 })
 
 function handleStart() {
+  // 正在处理中（非播放状态），禁止操作
   if (isProcessing.value && !isPlaying.value) return
+  // 正在播放，先打断再开始录音
+  if (isPlaying.value) {
+    emit('interrupt')
+    // 延迟一小段时间再开始录音，确保播放完全停止
+    setTimeout(() => {
+      emit('start')
+    }, 100)
+    return
+  }
   emit('start')
 }
 
@@ -147,9 +157,9 @@ watch(isRecording, (recording) => {
   width: 68px;
   height: 68px;
   border-radius: 50%;
-  border: 2px solid var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent);
+  border: 2px solid var(--accent-purple);
+  background: rgba(108, 140, 255, 0.1);
+  color: var(--accent-purple);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -165,23 +175,23 @@ watch(isRecording, (recording) => {
 }
 
 .voice-btn--recording {
-  background: var(--accent);
+  background: var(--accent-purple);
   color: #fff;
-  border-color: var(--accent);
-  box-shadow: 0 0 24px var(--accent-glow);
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 24px rgba(108, 140, 255, 0.4);
   animation: btn-breathe 1.5s ease-in-out infinite;
 }
 
 .voice-btn--processing {
   border-color: var(--text-muted);
   color: var(--text-muted);
-  background: var(--bg-card);
+  background: rgba(30, 30, 50, 0.7);
   cursor: not-allowed;
 }
 
 .voice-btn--playing {
-  border-color: var(--success);
-  color: var(--success);
+  border-color: #34d399;
+  color: #34d399;
   background: rgba(52, 211, 153, 0.12);
 }
 
@@ -189,11 +199,11 @@ watch(isRecording, (recording) => {
 
   0%,
   100% {
-    box-shadow: 0 0 24px var(--accent-glow);
+    box-shadow: 0 0 24px rgba(108, 140, 255, 0.4);
   }
 
   50% {
-    box-shadow: 0 0 40px var(--accent-glow), 0 0 60px rgba(108, 140, 255, 0.15);
+    box-shadow: 0 0 40px rgba(108, 140, 255, 0.4), 0 0 60px rgba(108, 140, 255, 0.15);
   }
 }
 
@@ -205,7 +215,7 @@ watch(isRecording, (recording) => {
   width: 68px;
   height: 68px;
   border-radius: 50%;
-  border: 2px solid var(--accent);
+  border: 2px solid var(--accent-purple);
   transform: translate(-50%, -65%);
   z-index: 0;
   animation: pulse-ring 2s ease-out infinite;

@@ -81,7 +81,7 @@ async function handleAudio(ws, audioBase64, clientMessages) {
   }
 
   console.log("[WS] 开始调用 TTS...");
-  const voice = ws.settings?.voice || "claire";
+  const voice = ws.settings?.voice || "xiaoyun";
   const ttsBuffer = await synthesizeSpeech(cleanReply, voice);
   if (ws.interrupted) return;
   console.log("[WS] TTS 返回 Buffer 大小:", ttsBuffer?.length, "bytes");
@@ -140,7 +140,8 @@ async function handleText(ws, text, clientMessages) {
     return;
   }
 
-  // 注意：文字消息不发送 transcript，前端已自行显示
+  // 发送用户输入的文字（前端可用来显示）
+  sendMessage(ws, "transcript", { text });
 
   // 构建多轮对话消息
   const difficulty = ws.settings?.difficulty || "medium";
@@ -180,7 +181,7 @@ async function handleText(ws, text, clientMessages) {
     return;
   }
 
-  const voice = ws.settings?.voice || "claire";
+  const voice = ws.settings?.voice || "xiaoyun";
   const ttsBuffer = await synthesizeSpeech(cleanReply, voice);
   if (ws.interrupted) return;
   if (!ttsBuffer) {
@@ -199,10 +200,6 @@ function routeMessage(ws, parsed) {
 
   switch (type) {
     case "audio":
-      console.log(
-        "[WS DEBUG] 收到 audio 消息，当前 ws.settings:",
-        JSON.stringify(ws.settings, null, 2),
-      );
       handleAudio(ws, data?.audio, data?.messages).catch((err) => {
         console.error("[WS] 处理音频流程错误:", err.message);
         sendMessage(ws, "error", { message: "处理失败，请重试" });
@@ -248,7 +245,7 @@ function createWebSocketServer(server) {
     console.log("[WS] 客户端已连接");
 
     // 初始化客户端设置
-    ws.settings = { difficulty: "medium", voice: "claire", scene: "daily" };
+    ws.settings = { difficulty: "medium", voice: "xiaoyun", scene: "daily" };
 
     ws.on("message", (raw) => {
       try {

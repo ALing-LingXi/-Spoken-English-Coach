@@ -22,7 +22,6 @@
         :class="{ recording: isRecording, playing: isPlaying }"
         @mousedown="handleVoiceStart"
         @mouseup="handleVoiceStop"
-        @mouseleave="handleVoiceStop"
         @touchstart.prevent="handleVoiceStart"
         @touchend.prevent="handleVoiceStop"
       >
@@ -43,24 +42,29 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useChatStore } from '../store/chat'
+import { useChatStore } from '@/store/chat'
 
 const store = useChatStore()
 const { isRecording, isProcessing, isPlaying } = storeToRefs(store)
 
-const props = defineProps({
-  waveformData: { type: Object, default: () => new Uint8Array(0) },
-})
+defineProps<{
+  waveformData?: Uint8Array
+}>()
 
-const emit = defineEmits(['sendText', 'startRecording', 'stopRecording'])
+const emit = defineEmits<{
+  sendText: [text: string]
+  startRecording: []
+  stopRecording: []
+  interrupt: []
+}>()
 
 const text = ref('')
-const textareaRef = ref(null)
+const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
-const voiceLabel = computed(() => {
+const voiceLabel = computed<string>(() => {
   if (isProcessing.value && !isPlaying.value) return '处理中'
   if (isPlaying.value) return '点击打断'
   if (isRecording.value) return '松开停止'
@@ -68,7 +72,7 @@ const voiceLabel = computed(() => {
 })
 
 /** 发送文字 */
-function sendText() {
+function sendText(): void {
   if (!text.value.trim()) return
   emit('sendText', text.value.trim())
   text.value = ''
@@ -76,14 +80,14 @@ function sendText() {
 }
 
 /** Enter 发送，Shift+Enter 换行 */
-function handleEnter(e) {
+function handleEnter(e: KeyboardEvent): void {
   if (e.shiftKey) return
   e.preventDefault()
   sendText()
 }
 
 /** 自动调整高度 */
-function autoResize() {
+function autoResize(): void {
   const el = textareaRef.value
   if (!el) return
   el.style.height = 'auto'
@@ -91,12 +95,21 @@ function autoResize() {
 }
 
 /** 语音按钮交互 */
-function handleVoiceStart() {
+function handleVoiceStart(): void {
+  // 正在处理中（非播放状态），禁止操作
   if (isProcessing.value && !isPlaying.value) return
+  // 正在播放，先打断再开始录音
+  if (isPlaying.value) {
+    emit('interrupt')
+    setTimeout(() => {
+      emit('startRecording')
+    }, 100)
+    return
+  }
   emit('startRecording')
 }
 
-function handleVoiceStop() {
+function handleVoiceStop(): void {
   if (!isRecording.value) return
   emit('stopRecording')
 }

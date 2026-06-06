@@ -59,7 +59,7 @@
           </svg>
         </div>
         <span class="sidebar__chat-name">{{ chat.name }}</span>
-        <button class="sidebar__chat-delete" @click.stop="$emit('deleteChat', chat.id)">
+        <button v-if="!chat.isFirst" class="sidebar__chat-delete" @click.stop="$emit('deleteChat', chat.id)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"/>
             <line x1="6" y1="6" x2="18" y2="18"/>
@@ -84,24 +84,31 @@
   </aside>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue'
 import SceneSelector from './SceneSelector.vue'
+import type { ConversationListItem, SceneType } from '@/types'
 
-const props = defineProps({
-  collapsed: Boolean,
-  isConnected: Boolean,
-  chats: { type: Array, default: () => [] },
-  activeChatId: { type: [String, Number], default: null },
-  modelScene: { type: String, default: 'daily' },
-})
+const props = defineProps<{
+  collapsed: boolean
+  isConnected: boolean
+  chats: ConversationListItem[]
+  activeChatId: string | null
+  modelScene: SceneType
+}>()
 
-const emit = defineEmits(['toggle', 'newChat', 'selectChat', 'deleteChat', 'sceneChange'])
+const emit = defineEmits<{
+  toggle: []
+  newChat: []
+  selectChat: [id: string]
+  deleteChat: [id: string]
+  sceneChange: [scene: SceneType]
+}>()
 
-const currentScene = ref(props.modelScene)
+const currentScene = ref<SceneType>(props.modelScene)
 watch(() => props.modelScene, (val) => { currentScene.value = val })
 
-function handleSceneChange(scene) {
+function handleSceneChange(scene: SceneType): void {
   emit('sceneChange', scene)
 }
 </script>

@@ -75,6 +75,26 @@
           </div>
         </div>
       </div>
+
+      <!-- 处理中但还没收到流式回复 -->
+      <div v-if="isProcessing && !currentReply && !isPlaying" class="chat-msg chat-msg--assistant">
+        <div class="chat-msg__ai-row">
+          <div class="chat-msg__avatar chat-msg__avatar--typing">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 16v-4M12 8h.01"/>
+            </svg>
+          </div>
+          <div class="chat-msg__bubble chat-msg__bubble--ai">
+            <div class="chat-msg__thinking">
+              <span class="thinking-dot"></span>
+              <span class="thinking-dot"></span>
+              <span class="thinking-dot"></span>
+              <span class="thinking-label">正在思考...</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 输入区 -->
@@ -83,29 +103,36 @@
       @sendText="handleSendText"
       @startRecording="$emit('startRecording')"
       @stopRecording="$emit('stopRecording')"
+      @interrupt="$emit('interrupt')"
     />
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, nextTick, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useChatStore } from '../store/chat'
-import { sendMessage } from '../api/ws'
+import { useChatStore } from '@/store/chat'
+import { sendMessage } from '@/api/ws'
 import MessageInput from './MessageInput.vue'
 
 const store = useChatStore()
 const { messages, currentReply } = storeToRefs(store)
-const messagesRef = ref(null)
+const messagesRef = ref<HTMLDivElement | null>(null)
 
-const props = defineProps({
-  waveformData: { type: Object, default: () => new Uint8Array(0) },
-})
+defineProps<{
+  waveformData?: Uint8Array
+  isProcessing: boolean
+  isPlaying: boolean
+}>()
 
-const emit = defineEmits(['startRecording', 'stopRecording'])
+const emit = defineEmits<{
+  startRecording: []
+  stopRecording: []
+  interrupt: []
+}>()
 
 /** 发送文字消息 */
-function handleSendText(text) {
+function handleSendText(text: string): void {
   store.addMessage('user', text)
   store.startReply()
   sendMessage('text', { text, messages: store.getLLMMessages() })
@@ -120,7 +147,7 @@ watch(
         messagesRef.value.scrollTop = messagesRef.value.scrollHeight
       }
     })
-  }
+  },
 )
 </script>
 
@@ -429,5 +456,35 @@ watch(
 @keyframes avatar-bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-3px); }
+}
+
+/* 思考动画 */
+.chat-msg__thinking {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.thinking-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-purple);
+  animation: thinking-bounce 1.2s ease-in-out infinite;
+}
+
+.thinking-dot:nth-child(2) { animation-delay: 0.15s; }
+.thinking-dot:nth-child(3) { animation-delay: 0.3s; }
+
+.thinking-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+
+@keyframes thinking-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
 }
 </style>

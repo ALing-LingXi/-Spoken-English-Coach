@@ -42,24 +42,28 @@
   </aside>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import SettingsPanel from './SettingsPanel.vue'
+import type { SettingsData } from '@/types'
 
-const props = defineProps({
-  open: Boolean,
-})
+defineProps<{
+  open: boolean
+}>()
 
-const emit = defineEmits(['close', 'settingsChange'])
+const emit = defineEmits<{
+  close: []
+  settingsChange: [settings: SettingsData]
+}>()
 
-const activeTab = ref('settings')
+const activeTab = ref<'settings' | 'about'>('settings')
 
 const tabs = [
-  { key: 'settings', label: '设置' },
-  { key: 'about', label: '关于' },
+  { key: 'settings' as const, label: '设置' },
+  { key: 'about' as const, label: '关于' },
 ]
 
-function handleSettingsChange(settings) {
+function handleSettingsChange(settings: SettingsData): void {
   emit('settingsChange', settings)
 }
 </script>

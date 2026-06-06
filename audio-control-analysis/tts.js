@@ -10,7 +10,7 @@ const SILICONFLOW_TTS_URL = `${config.SILICONFLOW_BASE_URL}/audio/speech`;
  * @param {string} voice - 音色，默认 alex
  * @returns {Promise<Buffer|null>} 音频 Buffer，失败返回 null
  */
-async function synthesizeSpeech(text, voice = "claire") {
+async function synthesizeSpeech(text, voice = "alex") {
   console.log("[TTS] 开始合成, 文本:", text, "音色:", voice);
 
   try {
@@ -22,11 +22,6 @@ async function synthesizeSpeech(text, voice = "claire") {
         response_format: "mp3",
         stream: false,
       };
-
-      console.log(
-        "[TTS DEBUG] 发送给 SiliconFlow 的 payload:",
-        JSON.stringify(requestBody, null, 2),
-      );
 
       const response = await axios.post(SILICONFLOW_TTS_URL, requestBody, {
         headers: {

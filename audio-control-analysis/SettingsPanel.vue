@@ -13,10 +13,16 @@
       <!-- 音色 -->
       <div class="settings__item">
         <label>音色</label>
-        <el-radio-group v-model="voice">
-          <el-radio-button value="claire">女声</el-radio-button>
-          <el-radio-button value="alex">男声</el-radio-button>
-        </el-radio-group>
+        <el-select v-model="voice" placeholder="选择音色">
+          <el-option label="小云 - 标准女声" value="xiaoyun" />
+          <el-option label="小宇 - 标准男声" value="xiaoyu" />
+          <el-option label="晓晓 - 温柔女声" value="xiaoxiao" />
+          <el-option label="小峰 - 成熟男声" value="xiaofeng" />
+          <el-option label="小美 - 甜美女声" value="xiaomei" />
+          <el-option label="小帅 - 阳光男声" value="xiaoshuai" />
+          <el-option label="小燕 - 亲切女声" value="xiaoyan" />
+          <el-option label="小龙 - 硬朗男声" value="xiaolong" />
+        </el-select>
       </div>
 
       <!-- 难度 -->
@@ -44,38 +50,37 @@
   </component>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, watch } from 'vue'
-import type { SettingsData, VoiceId, DifficultyLevel } from '@/types'
 
-defineProps<{
-  modelValue?: boolean
-  embedded?: boolean
-}>()
+const props = defineProps({
+  modelValue: Boolean,
+  embedded: { type: Boolean, default: false },
+})
 
-const emit = defineEmits<{
-  'update:modelValue': [val: boolean]
-  change: [settings: SettingsData]
-}>()
+const emit = defineEmits(['update:modelValue', 'change'])
 
-const visible = ref(false)
+const visible = ref(props.modelValue)
+
+watch(() => props.modelValue, (val) => { visible.value = val })
+watch(visible, (val) => { emit('update:modelValue', val) })
 
 // 设置项，从 localStorage 恢复
-const speed = ref<number>(loadSetting('speed', 1.0))
-const voice = ref<VoiceId>(loadSetting<VoiceId>('voice', 'claire'))
-const difficulty = ref<DifficultyLevel>(loadSetting<DifficultyLevel>('difficulty', 'medium'))
-const correctionEnabled = ref<boolean>(loadSetting('correctionEnabled', true))
-const scoringEnabled = ref<boolean>(loadSetting('scoringEnabled', true))
+const speed = ref(loadSetting('speed', 1.0))
+const voice = ref(loadSetting('voice', 'alex'))
+const difficulty = ref(loadSetting('difficulty', 'medium'))
+const correctionEnabled = ref(loadSetting('correctionEnabled', true))
+const scoringEnabled = ref(loadSetting('scoringEnabled', true))
 
 /** 从 localStorage 读取设置 */
-function loadSetting<T>(key: string, defaultVal: T): T {
+function loadSetting(key, defaultVal) {
   const saved = localStorage.getItem(`setting_${key}`)
-  return saved !== null ? (JSON.parse(saved) as T) : defaultVal
+  return saved !== null ? JSON.parse(saved) : defaultVal
 }
 
 /** 保存设置到 localStorage 并通知父组件 */
 watch([speed, voice, difficulty, correctionEnabled, scoringEnabled], () => {
-  const settings: SettingsData = {
+  const settings = {
     speed: speed.value,
     voice: voice.value,
     difficulty: difficulty.value,
@@ -83,6 +88,7 @@ watch([speed, voice, difficulty, correctionEnabled, scoringEnabled], () => {
     scoringEnabled: scoringEnabled.value,
   }
 
+  // 持久化
   Object.entries(settings).forEach(([k, v]) => {
     localStorage.setItem(`setting_${k}`, JSON.stringify(v))
   })

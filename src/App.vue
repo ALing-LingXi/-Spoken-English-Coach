@@ -11,7 +11,8 @@
 
       <!-- 主聊天区域 -->
       <main class="app-main">
-        <ChatArea :waveformData="waveformData" @startRecording="handleStart" @stopRecording="handleStop" />
+        <ChatArea :waveformData="waveformData" :isProcessing="isProcessing" :isPlaying="isPlaying"
+          @startRecording="handleStart" @stopRecording="handleStop" @interrupt="handleInterrupt" />
       </main>
 
       <!-- 右侧面板 -->
@@ -37,60 +38,63 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useChatStore } from './store/chat'
-import { connectWebSocket, sendMessage, on, disconnect } from './api/ws'
-import { useRecorder } from './composables/useRecorder'
-import { usePlayer } from './composables/usePlayer'
-import Sidebar from './components/Sidebar.vue'
-import ChatArea from './components/ChatArea.vue'
-import RightPanel from './components/RightPanel.vue'
+import { useChatStore } from '@/store/chat'
+import { connectWebSocket, sendMessage, on, disconnect } from '@/api/ws'
+import { useRecorder } from '@/composables/useRecorder'
+import { usePlayer } from '@/composables/usePlayer'
+import Sidebar from '@/components/Sidebar.vue'
+import ChatArea from '@/components/ChatArea.vue'
+import RightPanel from '@/components/RightPanel.vue'
+import type { SceneType, TranscriptData, LLMChunkData, AudioResponseData, CorrectionData, ScoreData, ErrorData, SettingsData, VoiceId, DifficultyLevel } from '@/types'
 
 const store = useChatStore()
-const { isConnected, error } = storeToRefs(store)
-const { setConnected, setProcessing, addMessage, appendReply, setError, clearError, switchScene, clearMessages } = store
+const { isConnected, error, isProcessing, isPlaying } = storeToRefs(store)
+const { setConnected, setProcessing, addMessage, appendReply, setError, clearError, switchScene, createConversation, switchConversation, deleteConversation, getConversationList } = store
 
 const { startRecording, stopRecording, waveformData, requestPermission } = useRecorder()
-const { addToQueue, stop: stopPlayer } = usePlayer()
+const { addToQueue, stop: stopPlayer, clearQueue } = usePlayer()
 
 // 布局状态
 const sidebarCollapsed = ref(false)
 const showRightPanel = ref(false)
 
-// 对话管理
-const chatList = ref([
-  { id: 1, name: '当前对话' }
-])
-const activeChatId = ref(1)
+// 对话列表（从 Store 读取）
+const chatList = computed(() => getConversationList())
+const activeChatId = computed(() => store.activeConversationId)
 
 // 场景
-const currentScene = ref(store.currentScene)
+const currentScene = computed<SceneType>(() => store.currentScene)
 
 /** 新建对话 */
-function handleNewChat() {
-  const id = Date.now()
-  chatList.value.push({ id, name: `对话 ${chatList.value.length + 1}` })
-  activeChatId.value = id
-  clearMessages()
+function handleNewChat(): void {
+  stopPlayer()
+  clearQueue()
+  createConversation()
 }
 
 /** 选择对话 */
-function handleSelectChat(id) {
-  activeChatId.value = id
+function handleSelectChat(id: string): void {
+  stopPlayer()
+  clearQueue()
+  switchConversation(id)
 }
 
 /** 删除对话 */
-function handleDeleteChat(id) {
-  chatList.value = chatList.value.filter(c => c.id !== id)
-  if (activeChatId.value === id && chatList.value.length > 0) {
-    activeChatId.value = chatList.value[0].id
+function handleDeleteChat(id: string): void {
+  stopPlayer()
+  clearQueue()
+  deleteConversation(id)
+  // 删除后检查是否只剩默认对话，自动新建以保证良好体验
+  if (chatList.value.length <= 1) {
+    createConversation()
   }
 }
 
 /** 按下：打断播放或开始录音 */
-async function handleStart() {
+async function handleStart(): Promise<void> {
   if (isConnected.value) {
     stopPlayer()
     sendMessage('interrupt', {})
@@ -103,8 +107,14 @@ async function handleStart() {
   await startRecording()
 }
 
+/** 打断播放 */
+function handleInterrupt(): void {
+  stopPlayer()
+  sendMessage('interrupt', {})
+}
+
 /** 松开录音 */
-async function handleStop() {
+async function handleStop(): Promise<void> {
   store.setRecording(false)
   const base64 = await stopRecording()
   if (!base64) return
@@ -114,60 +124,77 @@ async function handleStop() {
 }
 
 /** 处理语音识别结果 */
-function handleTranscript(data) {
-  addMessage('user', data.text)
+function handleTranscript(data: unknown): void {
+  const d = data as TranscriptData
+  addMessage('user', d.text)
   store.startReply()
 }
 
 /** 处理 LLM 流式片段 */
-function handleLLMChunk(data) {
-  appendReply(data.text)
+function handleLLMChunk(data: unknown): void {
+  const d = data as LLMChunkData
+  appendReply(d.text)
 }
 
 /** 处理 TTS 音频返回 */
-function handleAudio(data) {
+function handleAudio(data: unknown): void {
+  const d = data as AudioResponseData
   store.finishReply()
-  if (data.audio) {
-    addToQueue(data.audio)
+  if (d.audio) {
+    addToQueue(d.audio)
   }
   setProcessing(false)
 }
 
 /** 处理纠错内容 */
-function handleCorrection(data) {
-  store.setCorrection(data.text)
+function handleCorrection(data: unknown): void {
+  const d = data as CorrectionData
+  store.setCorrection(d.text)
 }
 
 /** 处理评分 */
-function handleScore(data) {
-  if (data.score) {
-    store.setScore(data.score, data.feedback || null)
+function handleScore(data: unknown): void {
+  const d = data as ScoreData
+  if (d.score) {
+    store.setScore(d.score, d.feedback ?? null)
   }
 }
 
 /** 场景切换 */
-function handleSceneChange(scene) {
-  currentScene.value = scene
+function handleSceneChange(scene: SceneType): void {
   switchScene(scene)
   sendMessage('scene', { scene })
 }
 
 /** 设置变更 */
-function handleSettingsChange(settings) {
+function handleSettingsChange(settings: SettingsData): void {
   sendMessage('setting', settings)
 }
 
+/** 同步当前设置到后端 */
+function syncSettings(): void {
+  sendMessage('setting', {
+    difficulty: (localStorage.getItem('setting_difficulty') ? JSON.parse(localStorage.getItem('setting_difficulty')!) : 'medium') as DifficultyLevel,
+    voice: (localStorage.getItem('setting_voice') ? JSON.parse(localStorage.getItem('setting_voice')!) : 'claire') as VoiceId,
+    scene: currentScene.value,
+  })
+}
+
 /** 注册 WebSocket 回调 */
-function registerCallbacks() {
-  on('open', () => setConnected(true))
+function registerCallbacks(): void {
+  on('open', () => {
+    setConnected(true)
+    syncSettings()
+  })
   on('close', () => setConnected(false))
   on('transcript', handleTranscript)
   on('llm_chunk', handleLLMChunk)
   on('audio', handleAudio)
   on('correction', handleCorrection)
   on('score', handleScore)
-  on('error', (data) => {
-    setError(data?.message || '服务器错误')
+  on('error', (data: unknown) => {
+    const d = data as ErrorData | null
+    setError(d?.message || '服务器错误')
     setProcessing(false)
   })
 }
@@ -176,12 +203,8 @@ onMounted(async () => {
   registerCallbacks()
   try {
     await connectWebSocket()
-    sendMessage('setting', {
-      difficulty: localStorage.getItem('setting_difficulty') ? JSON.parse(localStorage.getItem('setting_difficulty')) : 'medium',
-      voice: localStorage.getItem('setting_voice') ? JSON.parse(localStorage.getItem('setting_voice')) : 'alex',
-      scene: currentScene.value,
-    })
-  } catch (err) {
+    syncSettings()
+  } catch {
     setError('WebSocket 连接失败')
   }
 })

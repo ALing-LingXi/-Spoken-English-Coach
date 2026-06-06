@@ -45,7 +45,7 @@
 
 <script setup>
 import { ref, nextTick, watch } from 'vue'
-import { useChatStore } from '../store/chat'
+import { useChatStore } from '@/store/chat'
 import { storeToRefs } from 'pinia'
 
 const store = useChatStore()
@@ -148,25 +148,25 @@ watch(
 
 /* 用户气泡 */
 .chat-bubble--user {
-  background: var(--user-bubble);
+  background: linear-gradient(135deg, var(--accent-red), #c93048);
   color: #fff;
   border-bottom-right-radius: 4px;
-  box-shadow: 0 2px 12px rgba(108, 140, 255, 0.2);
+  box-shadow: 0 2px 12px rgba(233, 69, 96, 0.3);
 }
 
 /* AI 气泡 */
 .chat-bubble--ai {
-  background: var(--ai-bubble);
+  background: rgba(35, 35, 55, 0.85);
   color: var(--text-primary);
   border-bottom-left-radius: 4px;
-  border: 1px solid var(--glass-border);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(8px);
 }
 
 /* 打字光标 */
 .chat-cursor {
   animation: blink 0.8s infinite;
-  color: var(--accent);
+  color: var(--accent-purple);
 }
 
 @keyframes blink {
@@ -179,9 +179,9 @@ watch(
 .chat-correction {
   margin-top: 8px;
   padding: 6px 10px;
-  background: var(--correction-bg);
+  background: rgba(245, 166, 35, 0.1);
   border-radius: 8px;
-  border-left: 3px solid var(--correction-border);
+  border-left: 3px solid var(--accent-gold);
   display: flex;
   align-items: flex-start;
   gap: 6px;
@@ -191,8 +191,8 @@ watch(
   flex-shrink: 0;
   font-size: 11px;
   font-weight: 700;
-  color: var(--correction-text);
-  background: rgba(251, 191, 36, 0.2);
+  color: var(--accent-gold);
+  background: rgba(245, 166, 35, 0.2);
   padding: 1px 6px;
   border-radius: 4px;
   text-transform: uppercase;
@@ -201,7 +201,7 @@ watch(
 
 .chat-correction__text {
   font-size: 13px;
-  color: var(--correction-text);
+  color: #ffd591;
   line-height: 1.5;
 }
 
@@ -214,7 +214,7 @@ watch(
 }
 
 .chat-score__stars {
-  color: var(--warning);
+  color: var(--accent-gold);
   font-size: 13px;
   letter-spacing: 1px;
 }
