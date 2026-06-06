@@ -1,5 +1,6 @@
 const axios = require("axios");
 const config = require("../config");
+const { retry } = require("../utils/retry");
 
 const SILICONFLOW_TTS_URL = `${config.SILICONFLOW_BASE_URL}/audio/speech`;
 
@@ -13,30 +14,32 @@ async function synthesizeSpeech(text, voice = "alex") {
   console.log("[TTS] 开始合成, 文本:", text);
 
   try {
-    const requestBody = {
-      model: "FunAudioLLM/CosyVoice2-0.5B",
-      input: text,
-      voice: "FunAudioLLM/CosyVoice2-0.5B:alex",
-      response_format: "mp3",
-      stream: false,
-    };
+    return await retry(async () => {
+      const requestBody = {
+        model: "FunAudioLLM/CosyVoice2-0.5B",
+        input: text,
+        voice: "FunAudioLLM/CosyVoice2-0.5B:alex",
+        response_format: "mp3",
+        stream: false,
+      };
 
-    const response = await axios.post(SILICONFLOW_TTS_URL, requestBody, {
-      headers: {
-        Authorization: `Bearer ${config.SILICONFLOW_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      responseType: "arraybuffer",
+      const response = await axios.post(SILICONFLOW_TTS_URL, requestBody, {
+        headers: {
+          Authorization: `Bearer ${config.SILICONFLOW_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        responseType: "arraybuffer",
+      });
+
+      console.log(
+        "[TTS] 响应状态:",
+        response.status,
+        "数据大小:",
+        response.data?.length,
+        "bytes",
+      );
+      return Buffer.from(response.data);
     });
-
-    console.log(
-      "[TTS] 响应状态:",
-      response.status,
-      "数据大小:",
-      response.data?.length,
-      "bytes",
-    );
-    return Buffer.from(response.data);
   } catch (error) {
     if (error.response) {
       const errMsg = error.response.data?.toString?.() || "";

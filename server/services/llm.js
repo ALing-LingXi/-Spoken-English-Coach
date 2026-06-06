@@ -1,5 +1,6 @@
 const axios = require('axios');
 const config = require('../config');
+const { retry } = require('../utils/retry');
 
 const SILICONFLOW_LLM_URL = `${config.SILICONFLOW_BASE_URL}/chat/completions`;
 
@@ -38,13 +39,14 @@ function getRequestHeaders() {
  */
 async function generateReply(messages) {
   try {
-    const response = await axios.post(
-      SILICONFLOW_LLM_URL,
-      buildRequestBody(messages, false),
-      { headers: getRequestHeaders() },
-    );
-
-    return response.data?.choices?.[0]?.message?.content || null;
+    return await retry(async () => {
+      const response = await axios.post(
+        SILICONFLOW_LLM_URL,
+        buildRequestBody(messages, false),
+        { headers: getRequestHeaders() },
+      );
+      return response.data?.choices?.[0]?.message?.content || null;
+    });
   } catch (error) {
     handleLLMError(error);
     return null;

@@ -1,22 +1,29 @@
 <template>
-  <button
-    class="voice-btn"
-    :class="{ 'voice-btn--recording': isRecording, 'voice-btn--disabled': isProcessing || isPlaying }"
+  <el-button
+    :type="isRecording ? 'danger' : 'primary'"
     :disabled="isProcessing || isPlaying"
+    :loading="isProcessing || isPlaying"
+    size="large"
+    round
+    class="voice-btn"
     @mousedown="handleStart"
     @mouseup="handleStop"
     @mouseleave="handleStop"
     @touchstart.prevent="handleStart"
     @touchend.prevent="handleStop"
   >
-    <span class="voice-btn__icon">{{ isRecording ? '⏹' : '🎤' }}</span>
+    <el-icon :size="24" class="voice-btn__icon">
+      <Microphone v-if="!isRecording" />
+      <VideoPause v-else />
+    </el-icon>
     <span class="voice-btn__label">{{ label }}</span>
-  </button>
+  </el-button>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
+import { Microphone, VideoPause } from '@element-plus/icons-vue'
 import { useChatStore } from '../store/chat'
 
 const emit = defineEmits(['start', 'stop'])
@@ -45,36 +52,16 @@ function handleStop() {
 <style scoped>
 .voice-btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 20px 32px;
-  border: none;
-  border-radius: 16px;
-  background: #4a90d9;
-  color: #fff;
+  padding: 16px 36px;
   font-size: 16px;
-  cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
-  transition: background 0.2s, transform 0.1s;
-}
-
-.voice-btn:active:not(.voice-btn--disabled) {
-  transform: scale(0.96);
-}
-
-.voice-btn--recording {
-  background: #e74c3c;
-}
-
-.voice-btn--disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .voice-btn__icon {
-  font-size: 32px;
+  font-size: 24px;
 }
 
 .voice-btn__label {

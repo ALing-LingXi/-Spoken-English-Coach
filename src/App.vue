@@ -1,32 +1,43 @@
 <template>
-  <div class="app">
-    <!-- 顶部状态栏 -->
-    <header class="app__header">
-      <h1 class="app__title">AI 英语口语陪练</h1>
-      <span :class="['app__status', isConnected ? 'app__status--on' : 'app__status--off']">
+  <el-container class="app">
+    <!-- 顶部导航栏 -->
+    <el-header class="app__header">
+      <div class="app__header-left">
+        <el-icon :size="24"><Microphone /></el-icon>
+        <span class="app__title">AI 英语口语陪练</span>
+      </div>
+      <el-tag :type="isConnected ? 'success' : 'danger'" effect="dark" round>
         {{ isConnected ? '已连接' : '未连接' }}
-      </span>
-    </header>
+      </el-tag>
+    </el-header>
 
     <!-- 错误提示 -->
-    <div v-if="error" class="app__error">
-      {{ error }}
-      <button class="app__error-close" @click="clearError">&times;</button>
-    </div>
+    <el-alert
+      v-if="error"
+      :title="error"
+      type="error"
+      show-icon
+      :closable="true"
+      @close="clearError"
+      class="app__alert"
+    />
 
     <!-- 聊天面板 -->
-    <ChatPanel />
+    <el-main class="app__main">
+      <ChatPanel />
+    </el-main>
 
-    <!-- 录音按钮 -->
-    <div class="app__footer">
+    <!-- 底部录音区域 -->
+    <el-footer class="app__footer" height="auto">
       <VoiceButton @start="handleStart" @stop="handleStop" />
-    </div>
-  </div>
+    </el-footer>
+  </el-container>
 </template>
 
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
+import { Microphone } from '@element-plus/icons-vue'
 import { useChatStore } from './store/chat'
 import { connectWebSocket, sendMessage, on } from './api/ws'
 import { useRecorder } from './composables/useRecorder'
@@ -70,13 +81,11 @@ function handleLLMChunk(data) {
 
 /** 处理 TTS 音频返回 */
 function handleAudio(data) {
-  // 流结束，将完整 AI 回复写入消息
   if (currentAiText) {
     addMessage({ role: 'ai', content: currentAiText })
     currentAiText = ''
   }
 
-  // 播放音频
   if (data.audio) {
     addToQueue(data.audio)
   }
@@ -113,66 +122,43 @@ onUnmounted(() => {
 
 <style scoped>
 .app {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
   max-width: 480px;
   margin: 0 auto;
-  background: #fff;
+  height: 100vh;
 }
 
 .app__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid #eee;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.app__header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .app__title {
   font-size: 18px;
-  margin: 0;
+  font-weight: 600;
 }
 
-.app__status {
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 8px;
+.app__alert {
+  border-radius: 0;
 }
 
-.app__status--on {
-  background: #e6f7e6;
-  color: #2e7d32;
-}
-
-.app__status--off {
-  background: #fdecea;
-  color: #c62828;
-}
-
-.app__error {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
-  background: #fff3e0;
-  color: #e65100;
-  font-size: 13px;
-}
-
-.app__error-close {
-  background: none;
-  border: none;
-  color: #e65100;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 0 4px;
+.app__main {
+  padding: 0;
+  overflow: hidden;
 }
 
 .app__footer {
   display: flex;
   justify-content: center;
   padding: 16px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--el-border-color-lighter);
 }
 </style>

@@ -1,5 +1,6 @@
 const axios = require('axios');
 const config = require('../config');
+const { retry } = require('../utils/retry');
 
 const SILICONFLOW_ASR_URL = `${config.SILICONFLOW_BASE_URL}/audio/transcriptions`;
 
@@ -10,19 +11,21 @@ const SILICONFLOW_ASR_URL = `${config.SILICONFLOW_BASE_URL}/audio/transcriptions
  */
 async function recognizeSpeech(audioBuffer) {
   try {
-    const FormData = require('form-data');
-    const form = new FormData();
-    form.append('file', audioBuffer, { filename: 'audio.wav', contentType: 'audio/wav' });
-    form.append('model', 'FunAudioLLM/SenseVoiceSmall');
+    return await retry(async () => {
+      const FormData = require('form-data');
+      const form = new FormData();
+      form.append('file', audioBuffer, { filename: 'audio.wav', contentType: 'audio/wav' });
+      form.append('model', 'FunAudioLLM/SenseVoiceSmall');
 
-    const response = await axios.post(SILICONFLOW_ASR_URL, form, {
-      headers: {
-        ...form.getHeaders(),
-        Authorization: `Bearer ${config.SILICONFLOW_API_KEY}`,
-      },
+      const response = await axios.post(SILICONFLOW_ASR_URL, form, {
+        headers: {
+          ...form.getHeaders(),
+          Authorization: `Bearer ${config.SILICONFLOW_API_KEY}`,
+        },
+      });
+
+      return response.data?.text || null;
     });
-
-    return response.data?.text || null;
   } catch (error) {
     if (error.response) {
       console.error('[ASR] API 错误:', error.response.status, error.response.data);

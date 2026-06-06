@@ -12,8 +12,8 @@
 
 ## Impact
 - 新增项目：完整的 AI 英语口语陪练应用
-- 技术栈：Vue 3 + Pinia + Node.js + Express + WebSocket
-- 第三方依赖：SiliconFlow API
+- 技术栈：Vue 3 + Pinia + Element Plus + Node.js + Express + WebSocket
+- 第三方依赖：SiliconFlow API、Element Plus
 
 ## ADDED Requirements
 
@@ -79,13 +79,21 @@
 - **WHEN** 接收到 AI 音频数据
 - **THEN** 播放音频并显示播放状态
 
-### Requirement: 极简 UI 界面
-系统 SHALL 提供极简的 UI 界面，包含录音按钮和聊天面板。
+### Requirement: Element Plus UI 界面
+系统 SHALL 提供基于 Element Plus 组件库的 UI 界面，包含录音按钮和聊天面板。
 
 #### Scenario: 显示聊天记录
 - **WHEN** 用户和 AI 进行对话
-- **THEN** 在聊天面板显示对话记录
+- **THEN** 在聊天面板使用 el-card 和 el-avatar 组件显示对话记录
 
 #### Scenario: 显示状态
 - **WHEN** 系统处理中
-- **THEN** 显示当前处理状态（录音中、识别中、生成中、播放中）
+- **THEN** 使用 el-button loading 状态和 el-tag 显示当前处理状态（录音中、识别中、生成中、播放中）
+
+#### Scenario: 连接状态
+- **WHEN** WebSocket 连接状态变化
+- **THEN** 使用 el-tag 组件显示连接状态（success/danger）
+
+#### Scenario: 错误提示
+- **WHEN** 发生错误
+- **THEN** 使用 el-alert 组件显示错误信息

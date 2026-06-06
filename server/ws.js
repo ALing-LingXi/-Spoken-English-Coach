@@ -78,6 +78,10 @@ function routeMessage(ws, parsed) {
         sendMessage(ws, "error", { message: "处理失败，请重试" });
       });
       break;
+    case "ping":
+      // 心跳响应
+      sendMessage(ws, "pong", {});
+      break;
     default:
       console.warn("[WS] 未知消息类型:", type);
   }
