@@ -1,5 +1,5 @@
 <template>
-  <el-drawer v-model="visible" title="设置" direction="rtl" size="280px">
+  <component :is="embedded ? 'div' : 'el-drawer'" v-model="visible" title="设置" direction="rtl" size="280px">
     <div class="settings">
       <!-- 语速 -->
       <div class="settings__item">
@@ -14,10 +14,14 @@
       <div class="settings__item">
         <label>音色</label>
         <el-select v-model="voice" placeholder="选择音色">
-          <el-option label="Alex（男声）" value="alex" />
-          <el-option label="Anna（女声）" value="anna" />
-          <el-option label="Bella（女声）" value="bella" />
-          <el-option label="Benjamin（男声）" value="benjamin" />
+          <el-option label="Alex - 沉稳男声" value="alex" />
+          <el-option label="Benjamin - 低沉男声" value="benjamin" />
+          <el-option label="Charles - 磁性男声" value="charles" />
+          <el-option label="David - 欢快男声" value="david" />
+          <el-option label="Anna - 沉稳女声" value="anna" />
+          <el-option label="Bella - 激情女声" value="bella" />
+          <el-option label="Claire - 温柔女声" value="claire" />
+          <el-option label="Diana - 欢快女声" value="diana" />
         </el-select>
       </div>
 
@@ -43,7 +47,7 @@
         <el-switch v-model="scoringEnabled" />
       </div>
     </div>
-  </el-drawer>
+  </component>
 </template>
 
 <script setup>
@@ -51,6 +55,7 @@ import { ref, watch } from 'vue'
 
 const props = defineProps({
   modelValue: Boolean,
+  embedded: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['update:modelValue', 'change'])
@@ -108,7 +113,7 @@ watch([speed, voice, difficulty, correctionEnabled, scoringEnabled], () => {
 .settings__item label {
   font-size: 14px;
   font-weight: 500;
-  color: var(--el-text-color-primary);
+  color: #eaeaea;
 }
 
 .settings__slider {
@@ -123,7 +128,7 @@ watch([speed, voice, difficulty, correctionEnabled, scoringEnabled], () => {
 
 .settings__value {
   font-size: 13px;
-  color: var(--el-text-color-secondary);
+  color: #8b8b9e;
   min-width: 36px;
   text-align: right;
 }

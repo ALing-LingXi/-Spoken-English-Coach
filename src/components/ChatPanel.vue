@@ -1,44 +1,45 @@
 <template>
   <div class="chat-panel" ref="panelRef">
     <div v-if="messages.length === 0 && !currentReply" class="chat-panel__empty">
-      <el-empty description="按住下方按钮开始对话" :image-size="80" />
+      <div class="chat-panel__empty-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+      </div>
+      <p class="chat-panel__empty-text">按住下方按钮，开始英语对话</p>
     </div>
 
-    <div v-for="(msg, index) in messages" :key="index" class="chat-msg">
+    <div v-for="(msg, index) in messages" :key="msg.id || index" class="chat-msg" :class="`chat-msg--${msg.role}`">
       <!-- 用户消息 -->
-      <div v-if="msg.role === 'user'" class="chat-msg__user">
-        <el-avatar :size="32" class="chat-msg__avatar chat-msg__avatar--user">你</el-avatar>
-        <el-card shadow="never" class="chat-msg__card chat-msg__card--user">
-          <p>{{ msg.content }}</p>
-        </el-card>
+      <div v-if="msg.role === 'user'" class="chat-bubble chat-bubble--user">
+        <p>{{ msg.content }}</p>
       </div>
 
       <!-- AI 消息 -->
-      <div v-else class="chat-msg__ai">
-        <el-avatar :size="32" class="chat-msg__avatar chat-msg__avatar--ai">AI</el-avatar>
-        <el-card shadow="never" class="chat-msg__card chat-msg__card--ai">
-          <p>{{ msg.content }}</p>
-          <!-- 纠错内容 -->
-          <div v-if="msg.correction" class="chat-msg__correction">
-            <span class="correction-label">纠错</span>
-            <span class="correction-text">{{ msg.correction }}</span>
-          </div>
-          <!-- 评分 -->
-          <div v-if="msg.score" class="chat-msg__score">
-            <span class="score-stars">{{ '★'.repeat(msg.score) }}{{ '☆'.repeat(5 - msg.score) }}</span>
-            <span v-if="msg.feedback" class="score-feedback">{{ msg.feedback }}</span>
-          </div>
-        </el-card>
+      <div v-else class="chat-bubble chat-bubble--ai">
+        <p>{{ msg.content }}</p>
+        <!-- 纠错内容 -->
+        <div v-if="msg.correction" class="chat-correction">
+          <span class="chat-correction__label">纠错</span>
+          <span class="chat-correction__text">{{ msg.correction }}</span>
+        </div>
+        <!-- 评分 -->
+        <div v-if="msg.score" class="chat-score">
+          <span class="chat-score__stars">{{ '★'.repeat(msg.score) }}{{ '☆'.repeat(5 - msg.score) }}</span>
+          <span v-if="msg.feedback" class="chat-score__feedback">{{ msg.feedback }}</span>
+        </div>
       </div>
     </div>
 
     <!-- 流式回复中 -->
-    <div v-if="currentReply" class="chat-msg chat-msg__ai">
-      <el-avatar :size="32" class="chat-msg__avatar chat-msg__avatar--ai">AI</el-avatar>
-      <el-card shadow="never" class="chat-msg__card chat-msg__card--ai">
-        <p class="typing">{{ currentReply }}<span class="cursor">▊</span></p>
-      </el-card>
-    </div>
+    <transition name="fade-up">
+      <div v-if="currentReply" class="chat-msg chat-msg--assistant">
+        <div class="chat-bubble chat-bubble--ai chat-bubble--typing">
+          <p>{{ currentReply }}<span class="chat-cursor">▊</span></p>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -51,7 +52,6 @@ const store = useChatStore()
 const { messages, currentReply } = storeToRefs(store)
 const panelRef = ref(null)
 
-// 新消息或流式更新时自动滚动到底部
 watch(
   () => [messages.value.length, currentReply.value],
   () => {
@@ -66,122 +66,171 @@ watch(
 .chat-panel {
   height: 100%;
   overflow-y: auto;
-  padding: 16px;
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  scroll-behavior: smooth;
 }
 
+/* 自定义滚动条 */
+.chat-panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+/* 空状态 */
 .chat-panel__empty {
   margin: auto;
-}
-
-.chat-msg__user {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  flex-direction: row-reverse;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
-.chat-msg__ai {
+.chat-panel__empty-icon {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.chat-panel__empty-text {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* 消息行 */
+.chat-msg {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  animation: msg-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.chat-msg__avatar--user {
-  background: var(--el-color-primary);
-  color: #fff;
-  flex-shrink: 0;
+.chat-msg--user {
+  justify-content: flex-end;
 }
 
-.chat-msg__avatar--ai {
-  background: var(--el-color-success);
-  color: #fff;
-  flex-shrink: 0;
+.chat-msg--assistant {
+  justify-content: flex-start;
 }
 
-.chat-msg__card {
-  max-width: 75%;
+@keyframes msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.chat-msg__card--user {
-  background: var(--el-color-primary-light-9);
-  border-color: var(--el-color-primary-light-7);
-}
-
-.chat-msg__card--user :deep(.el-card__body) {
+/* 气泡通用 */
+.chat-bubble {
+  max-width: 78%;
   padding: 10px 14px;
-}
-
-.chat-msg__card--ai {
-  background: var(--el-fill-color-light);
-  border-color: var(--el-border-color-lighter);
-}
-
-.chat-msg__card--ai :deep(.el-card__body) {
-  padding: 10px 14px;
-}
-
-.chat-msg__card p {
-  margin: 0;
+  border-radius: 16px;
   font-size: 14px;
   line-height: 1.6;
   word-break: break-word;
 }
 
-.chat-msg__correction {
-  margin-top: 8px;
-  padding: 6px 10px;
-  background: #fff3e0;
-  border-radius: 6px;
-  border-left: 3px solid #ff9800;
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
+.chat-bubble p {
+  margin: 0;
 }
 
-.correction-label {
-  flex-shrink: 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: #e65100;
-  background: #ffe0b2;
-  padding: 1px 6px;
-  border-radius: 3px;
+/* 用户气泡 */
+.chat-bubble--user {
+  background: var(--user-bubble);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 12px rgba(108, 140, 255, 0.2);
 }
 
-.correction-text {
-  font-size: 13px;
-  color: #bf360c;
-  line-height: 1.5;
+/* AI 气泡 */
+.chat-bubble--ai {
+  background: var(--ai-bubble);
+  color: var(--text-primary);
+  border-bottom-left-radius: 4px;
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(8px);
 }
 
-.chat-msg__score {
-  margin-top: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.score-stars {
-  color: #ffc107;
-  font-size: 14px;
-  letter-spacing: 1px;
-}
-
-.score-feedback {
-  font-size: 12px;
-  color: #888;
-}
-
-.typing .cursor {
+/* 打字光标 */
+.chat-cursor {
   animation: blink 0.8s infinite;
+  color: var(--accent);
 }
 
 @keyframes blink {
   50% {
     opacity: 0;
   }
+}
+
+/* 纠错 */
+.chat-correction {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: var(--correction-bg);
+  border-radius: 8px;
+  border-left: 3px solid var(--correction-border);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.chat-correction__label {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--correction-text);
+  background: rgba(251, 191, 36, 0.2);
+  padding: 1px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chat-correction__text {
+  font-size: 13px;
+  color: var(--correction-text);
+  line-height: 1.5;
+}
+
+/* 评分 */
+.chat-score {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-score__stars {
+  color: var(--warning);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.chat-score__feedback {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* 流式回复动画 */
+.fade-up-enter-active {
+  transition: all 0.3s ease;
+}
+
+.fade-up-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
 }
 </style>

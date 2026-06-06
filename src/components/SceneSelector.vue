@@ -46,30 +46,33 @@ function selectScene(scene) {
   display: flex;
   gap: 4px;
   padding: 4px;
-  background: var(--el-fill-color-light);
-  border-radius: 8px;
+  background: rgba(20, 20, 35, 0.7);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .scene-tab {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
+  gap: 5px;
+  padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 13px;
-  color: var(--el-text-color-regular);
-  transition: all 0.2s;
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
 }
 
 .scene-tab:hover {
-  background: var(--el-fill-color);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
 }
 
 .scene-tab.active {
-  background: var(--el-color-primary);
-  color: #fff;
+  background: linear-gradient(135deg, rgba(108, 140, 255, 0.2), rgba(108, 140, 255, 0.1));
+  color: var(--accent-purple);
+  border: 1px solid rgba(108, 140, 255, 0.2);
 }
 
 .scene-icon {
@@ -78,5 +81,6 @@ function selectScene(scene) {
 
 .scene-label {
   font-size: 12px;
+  font-weight: 500;
 }
 </style>

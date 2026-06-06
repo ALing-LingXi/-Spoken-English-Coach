@@ -127,6 +127,72 @@ function parseCorrection(text) {
 }
 
 /**
+ * 处理文字消息：跳过 ASR，直接 LLM(流式) → TTS
+ */
+async function handleText(ws, text, clientMessages) {
+  console.log("[WS] 收到文字消息:", text);
+
+  // 重置打断标记
+  ws.interrupted = false;
+
+  if (!text) {
+    sendMessage(ws, "error", { message: "文字消息为空" });
+    return;
+  }
+
+  // 发送用户输入的文字（前端可用来显示）
+  sendMessage(ws, "transcript", { text });
+
+  // 构建多轮对话消息
+  const difficulty = ws.settings?.difficulty || "medium";
+  const scene = ws.settings?.scene || "daily";
+  const systemPrompt = getSystemPrompt(difficulty, scene);
+  const messages = buildMessages(clientMessages, text, systemPrompt);
+
+  // LLM 流式生成回复
+  let fullReply = "";
+
+  for await (const chunk of generateReplyStream(
+    messages.messages,
+    messages.systemPrompt,
+  )) {
+    if (ws.interrupted) return;
+    fullReply += chunk;
+    sendMessage(ws, "llm_chunk", { text: chunk });
+  }
+  if (ws.interrupted) return;
+
+  // 解析纠错标记
+  const { reply, correction } = parseCorrection(fullReply);
+  if (correction) {
+    sendMessage(ws, "correction", { text: correction });
+  }
+
+  // 解析评分标记
+  const { score, feedback } = parseScore(reply);
+  if (score) {
+    sendMessage(ws, "score", { score, feedback });
+  }
+
+  // TTS 合成语音
+  const cleanReply = removeScoreFromReply(reply);
+  if (!cleanReply) {
+    sendMessage(ws, "error", { message: "LLM 回复为空" });
+    return;
+  }
+
+  const voice = ws.settings?.voice || "alex";
+  const ttsBuffer = await synthesizeSpeech(cleanReply, voice);
+  if (ws.interrupted) return;
+  if (!ttsBuffer) {
+    sendMessage(ws, "error", { message: "语音合成失败" });
+    return;
+  }
+
+  sendMessage(ws, "audio", { audio: bufferToBase64(ttsBuffer) });
+}
+
+/**
  * 根据消息类型分发处理
  */
 function routeMessage(ws, parsed) {
@@ -136,6 +202,12 @@ function routeMessage(ws, parsed) {
     case "audio":
       handleAudio(ws, data?.audio, data?.messages).catch((err) => {
         console.error("[WS] 处理音频流程错误:", err.message);
+        sendMessage(ws, "error", { message: "处理失败，请重试" });
+      });
+      break;
+    case "text":
+      handleText(ws, data?.text, data?.messages).catch((err) => {
+        console.error("[WS] 处理文字流程错误:", err.message);
         sendMessage(ws, "error", { message: "处理失败，请重试" });
       });
       break;

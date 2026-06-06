@@ -1,76 +1,93 @@
 <template>
-  <el-container class="app">
-    <!-- 顶部导航栏 -->
-    <el-header class="app__header">
-      <div class="app__header-left">
-        <el-icon :size="24">
-          <Microphone />
-        </el-icon>
-        <span class="app__title">AI 英语口语陪练</span>
-      </div>
-      <div class="app__header-right">
-        <el-tag :type="isConnected ? 'success' : 'danger'" effect="dark" round size="small">
-          {{ isConnected ? '已连接' : '未连接' }}
-        </el-tag>
-        <el-button :icon="Setting" circle size="small" @click="showSettings = true" />
-      </div>
-    </el-header>
+  <div class="app-container">
+    <!-- 动态渐变背景 -->
+    <div class="app-gradient-bg"></div>
 
-    <!-- 场景切换 -->
-    <div class="app__scene">
-      <SceneSelector v-model="currentScene" @change="handleSceneChange" />
+    <div class="app-layout">
+      <!-- 左侧栏 -->
+      <Sidebar :collapsed="sidebarCollapsed" :isConnected="isConnected" :chats="chatList" :activeChatId="activeChatId"
+        :modelScene="currentScene" @toggle="sidebarCollapsed = !sidebarCollapsed" @newChat="handleNewChat"
+        @selectChat="handleSelectChat" @deleteChat="handleDeleteChat" @sceneChange="handleSceneChange" />
+
+      <!-- 主聊天区域 -->
+      <main class="app-main">
+        <ChatArea :waveformData="waveformData" @startRecording="handleStart" @stopRecording="handleStop" />
+      </main>
+
+      <!-- 右侧面板 -->
+      <RightPanel :open="showRightPanel" @close="showRightPanel = false" @settingsChange="handleSettingsChange" />
+
+      <!-- 顶栏设置按钮（浮动） -->
+      <button class="app-layout__settings-btn" @click="showRightPanel = !showRightPanel">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+      </button>
+
+      <!-- 错误提示 -->
+      <Transition name="slide-down">
+        <div v-if="error" class="app-layout__error">
+          <span>{{ error }}</span>
+          <button @click="clearError">✕</button>
+        </div>
+      </Transition>
     </div>
-
-    <!-- 错误提示 -->
-    <el-alert v-if="error" :title="error" type="error" show-icon :closable="true" @close="clearError"
-      class="app__alert" />
-
-    <!-- 聊天面板 -->
-    <el-main class="app__main">
-      <ChatPanel />
-    </el-main>
-
-    <!-- 底部录音区域 -->
-    <el-footer class="app__footer" height="auto">
-      <VoiceButton :waveformData="waveformData" @start="handleStart" @stop="handleStop" />
-    </el-footer>
-
-    <!-- 设置面板 -->
-    <SettingsPanel v-model="showSettings" @change="handleSettingsChange" />
-  </el-container>
+  </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { Microphone, Setting } from '@element-plus/icons-vue'
 import { useChatStore } from './store/chat'
 import { connectWebSocket, sendMessage, on, disconnect } from './api/ws'
 import { useRecorder } from './composables/useRecorder'
 import { usePlayer } from './composables/usePlayer'
-import ChatPanel from './components/ChatPanel.vue'
-import VoiceButton from './components/VoiceButton.vue'
-import SceneSelector from './components/SceneSelector.vue'
-import SettingsPanel from './components/SettingsPanel.vue'
+import Sidebar from './components/Sidebar.vue'
+import ChatArea from './components/ChatArea.vue'
+import RightPanel from './components/RightPanel.vue'
 
 const store = useChatStore()
 const { isConnected, error } = storeToRefs(store)
-const { setConnected, setProcessing, setRecording, setPlaying, addMessage, appendReply, setError, clearError, switchScene } = store
-const { startRecording, stopRecording, waveformData, requestPermission, isRecording: recorderRecording } = useRecorder()
-const { addToQueue, interrupt, stop: stopPlayer, isPlaying: playerPlaying } = usePlayer()
+const { setConnected, setProcessing, addMessage, appendReply, setError, clearError, switchScene, clearMessages } = store
 
-// 设置面板
-const showSettings = ref(false)
+const { startRecording, stopRecording, waveformData, requestPermission } = useRecorder()
+const { addToQueue, stop: stopPlayer } = usePlayer()
 
-// 当前场景
+// 布局状态
+const sidebarCollapsed = ref(false)
+const showRightPanel = ref(false)
+
+// 对话管理
+const chatList = ref([
+  { id: 1, name: '当前对话' }
+])
+const activeChatId = ref(1)
+
+// 场景
 const currentScene = ref(store.currentScene)
 
-// 当前 AI 回复的缓冲（用于最终写入消息时带上纠错/评分）
-let currentAiText = ''
+/** 新建对话 */
+function handleNewChat() {
+  const id = Date.now()
+  chatList.value.push({ id, name: `对话 ${chatList.value.length + 1}` })
+  activeChatId.value = id
+  clearMessages()
+}
 
-// 同步录音/播放状态到 Store
-watch(recorderRecording, (val) => setRecording(val))
-watch(playerPlaying, (val) => setPlaying(val))
+/** 选择对话 */
+function handleSelectChat(id) {
+  activeChatId.value = id
+}
+
+/** 删除对话 */
+function handleDeleteChat(id) {
+  chatList.value = chatList.value.filter(c => c.id !== id)
+  if (activeChatId.value === id && chatList.value.length > 0) {
+    activeChatId.value = chatList.value[0].id
+  }
+}
 
 /** 按下：打断播放或开始录音 */
 async function handleStart() {
@@ -78,7 +95,6 @@ async function handleStart() {
     stopPlayer()
     sendMessage('interrupt', {})
   }
-  // 检查麦克风权限
   const hasPermission = await requestPermission()
   if (!hasPermission) {
     setError('请允许麦克风权限')
@@ -89,7 +105,7 @@ async function handleStart() {
 
 /** 松开录音 */
 async function handleStop() {
-  setRecording(false)
+  store.setRecording(false)
   const base64 = await stopRecording()
   if (!base64) return
 
@@ -100,27 +116,20 @@ async function handleStop() {
 /** 处理语音识别结果 */
 function handleTranscript(data) {
   addMessage('user', data.text)
-  // 启动流式回复
   store.startReply()
-  currentAiText = ''
 }
 
 /** 处理 LLM 流式片段 */
 function handleLLMChunk(data) {
-  currentAiText += data.text
   appendReply(data.text)
 }
 
 /** 处理 TTS 音频返回 */
 function handleAudio(data) {
-  // 结束流式回复，写入消息列表（带纠错和评分）
   store.finishReply()
-  currentAiText = ''
-
   if (data.audio) {
     addToQueue(data.audio)
   }
-
   setProcessing(false)
 }
 
@@ -165,7 +174,6 @@ function registerCallbacks() {
 
 onMounted(async () => {
   registerCallbacks()
-  // 连接后发送初始设置
   try {
     await connectWebSocket()
     sendMessage('setting', {
@@ -184,56 +192,226 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
-.app {
-  max-width: 480px;
-  margin: 0 auto;
-  height: 100vh;
+<style>
+/* 全局深色主题 CSS 变量 - 升级版 */
+:root {
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #12121a;
+  --bg-gradient-start: #1a1a2e;
+  --bg-gradient-end: #16213e;
+  --bg-gradient-accent: #0f0c29;
+  --bg-sidebar: rgba(20, 20, 35, 0.85);
+  --bg-card: rgba(30, 30, 50, 0.7);
+  --bg-card-hover: rgba(40, 40, 65, 0.8);
+  --accent-red: #e94560;
+  --accent-gold: #f5a623;
+  --accent-purple: #6c8cff;
+  --accent-blue: #4facfe;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0b0;
+  --text-muted: #6a6a7a;
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-hover: rgba(255, 255, 255, 0.1);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
 }
 
-.app__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
+* {
+  box-sizing: border-box;
 }
 
-.app__header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.app__header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.app__title {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.app__scene {
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-.app__alert {
-  border-radius: 0;
-}
-
-.app__main {
+body {
+  margin: 0;
   padding: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', 'SF Pro Display', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+/* 动态渐变背景 */
+.app-gradient-bg {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(108, 140, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(233, 69, 96, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(79, 172, 254, 0.04) 0%, transparent 60%),
+    linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-accent) 50%, var(--bg-gradient-end) 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Element Plus 深色主题覆盖 */
+.el-drawer {
+  background: rgba(18, 18, 26, 0.98) !important;
+  backdrop-filter: blur(20px);
+}
+
+.el-drawer__header {
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* 全局动画 */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes glow {
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+</style>
+
+<style scoped>
+.app-container {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  position: relative;
   overflow: hidden;
 }
 
-.app__footer {
+.app-main {
+  flex: 1;
   display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(20, 20, 35, 0.4);
+  backdrop-filter: blur(20px);
+}
+
+/* 设置按钮 */
+.app-layout__settings-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 50;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: rgba(30, 30, 50, 0.7);
+  backdrop-filter: blur(12px);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  padding: 16px;
-  border-top: 1px solid var(--el-border-color-lighter);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-sm);
+}
+
+.app-layout__settings-btn:hover {
+  background: rgba(42, 42, 74, 0.9);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* 错误提示 */
+.app-layout__error {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: rgba(233, 69, 96, 0.18);
+  border: 1px solid rgba(233, 69, 96, 0.35);
+  border-radius: var(--radius-lg);
+  color: #ff8888;
+  font-size: 14px;
+  font-weight: 500;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(233, 69, 96, 0.2);
+}
+
+.app-layout__error button {
+  background: none;
+  border: none;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+}
+
+/* 过渡动画 */
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-20px);
+}
+
+/* 响应式：小屏折叠侧边栏 */
+@media (max-width: 1024px) {
+  .app-layout__settings-btn {
+    top: 12px;
+    right: 12px;
+  }
 }
 </style>

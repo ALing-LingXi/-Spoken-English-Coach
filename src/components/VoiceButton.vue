@@ -1,33 +1,31 @@
 <template>
   <div class="voice-btn-wrapper">
+    <!-- 脉冲波纹 -->
+    <div v-if="isRecording" class="voice-btn__pulse"></div>
+    <div v-if="isRecording" class="voice-btn__pulse voice-btn__pulse--delay"></div>
+
     <!-- 环形频谱 canvas -->
-    <canvas
-      ref="canvasRef"
-      :width="canvasSize"
-      :height="canvasSize"
-      class="voice-btn-canvas"
-    />
+    <canvas ref="canvasRef" :width="canvasSize" :height="canvasSize" class="voice-btn-canvas" />
 
     <!-- 中心按钮 -->
-    <el-button
-      :type="isRecording ? 'danger' : 'primary'"
-      :disabled="isProcessing && !isPlaying"
-      :loading="isProcessing && !isPlaying"
-      circle
-      size="large"
-      class="voice-btn"
-      @mousedown="handleStart"
-      @mouseup="handleStop"
-      @mouseleave="handleStop"
-      @touchstart.prevent="handleStart"
-      @touchend.prevent="handleStop"
-    >
-      <el-icon :size="28">
-        <Microphone v-if="!isRecording && !isPlaying" />
-        <VideoPause v-else-if="isRecording" />
-        <VideoPlay v-else />
-      </el-icon>
-    </el-button>
+    <button class="voice-btn" :class="{
+      'voice-btn--recording': isRecording,
+      'voice-btn--processing': isProcessing && !isPlaying,
+      'voice-btn--playing': isPlaying,
+    }" :disabled="isProcessing && !isPlaying" @mousedown="handleStart" @mouseup="handleStop" @mouseleave="handleStop"
+      @touchstart.prevent="handleStart" @touchend.prevent="handleStop">
+      <svg v-if="!isRecording && !isProcessing && !isPlaying" width="28" height="28" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+        <line x1="12" y1="19" x2="12" y2="23" />
+        <line x1="8" y1="23" x2="16" y2="23" />
+      </svg>
+      <svg v-else-if="isRecording" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <rect x="6" y="6" width="12" height="12" rx="2" />
+      </svg>
+      <div v-else class="voice-btn__spinner"></div>
+    </button>
 
     <!-- 状态文字 -->
     <span class="voice-btn__label">{{ label }}</span>
@@ -37,7 +35,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { Microphone, VideoPause, VideoPlay } from '@element-plus/icons-vue'
 import { useChatStore } from '../store/chat'
 
 const props = defineProps({
@@ -50,29 +47,26 @@ const store = useChatStore()
 const { isRecording, isProcessing, isPlaying } = storeToRefs(store)
 
 const canvasRef = ref(null)
-const canvasSize = 160
+const canvasSize = 180
 const animFrameId = ref(null)
 
 const label = computed(() => {
   if (isProcessing.value && !isPlaying.value) return '处理中...'
   if (isPlaying.value) return '点击打断'
-  if (isRecording.value) return '松开停止'
+  if (isRecording.value) return '松开结束'
   return '按住说话'
 })
 
-/** 按下：如果正在播放则打断，否则开始录音 */
 function handleStart() {
   if (isProcessing.value && !isPlaying.value) return
   emit('start')
 }
 
-/** 松开：停止录音 */
 function handleStop() {
   if (!isRecording.value) return
   emit('stop')
 }
 
-/** 绘制环形频谱 */
 function drawSpectrum() {
   const canvas = canvasRef.value
   if (!canvas) return
@@ -80,8 +74,8 @@ function drawSpectrum() {
   const ctx = canvas.getContext('2d')
   const cx = canvasSize / 2
   const cy = canvasSize / 2
-  const innerRadius = 38
-  const maxBarHeight = 28
+  const innerRadius = 36
+  const maxBarHeight = 32
 
   ctx.clearRect(0, 0, canvasSize, canvasSize)
 
@@ -109,8 +103,8 @@ function drawSpectrum() {
     ctx.moveTo(x1, y1)
     ctx.lineTo(x2, y2)
     ctx.strokeStyle = isRecording.value
-      ? `rgba(245, 108, 108, ${0.4 + value * 0.6})`
-      : `rgba(64, 158, 255, ${0.4 + value * 0.6})`
+      ? `rgba(108, 140, 255, ${0.3 + value * 0.7})`
+      : `rgba(108, 140, 255, ${0.2 + value * 0.5})`
     ctx.lineWidth = 3
     ctx.lineCap = 'round'
     ctx.stroke()
@@ -119,18 +113,14 @@ function drawSpectrum() {
   animFrameId.value = requestAnimationFrame(drawSpectrum)
 }
 
-// 录音状态变化时启动/停止动画
 watch(isRecording, (recording) => {
   if (recording) {
     drawSpectrum()
   } else if (animFrameId.value) {
     cancelAnimationFrame(animFrameId.value)
     animFrameId.value = null
-    // 清空 canvas
     const canvas = canvasRef.value
-    if (canvas) {
-      canvas.getContext('2d').clearRect(0, 0, canvasSize, canvasSize)
-    }
+    if (canvas) canvas.getContext('2d').clearRect(0, 0, canvasSize, canvasSize)
   }
 })
 </script>
@@ -140,7 +130,7 @@ watch(isRecording, (recording) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   position: relative;
 }
 
@@ -148,24 +138,116 @@ watch(isRecording, (recording) => {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -60%);
+  transform: translate(-50%, -65%);
   pointer-events: none;
 }
 
+/* 中心按钮 */
 .voice-btn {
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
   z-index: 1;
-  transition: transform 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
 }
 
 .voice-btn:active {
   transform: scale(0.92);
 }
 
+.voice-btn--recording {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 0 24px var(--accent-glow);
+  animation: btn-breathe 1.5s ease-in-out infinite;
+}
+
+.voice-btn--processing {
+  border-color: var(--text-muted);
+  color: var(--text-muted);
+  background: var(--bg-card);
+  cursor: not-allowed;
+}
+
+.voice-btn--playing {
+  border-color: var(--success);
+  color: var(--success);
+  background: rgba(52, 211, 153, 0.12);
+}
+
+@keyframes btn-breathe {
+
+  0%,
+  100% {
+    box-shadow: 0 0 24px var(--accent-glow);
+  }
+
+  50% {
+    box-shadow: 0 0 40px var(--accent-glow), 0 0 60px rgba(108, 140, 255, 0.15);
+  }
+}
+
+/* 脉冲波纹 */
+.voice-btn__pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  transform: translate(-50%, -65%);
+  z-index: 0;
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+.voice-btn__pulse--delay {
+  animation-delay: 0.6s;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: translate(-50%, -65%) scale(1);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: translate(-50%, -65%) scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* 加载旋转 */
+.voice-btn__spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--text-muted);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 状态文字 */
 .voice-btn__label {
-  font-size: 13px;
-  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.3px;
 }
 </style>
