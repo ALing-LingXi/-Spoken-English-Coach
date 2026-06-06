@@ -1,0 +1,130 @@
+<template>
+  <el-drawer v-model="visible" title="设置" direction="rtl" size="280px">
+    <div class="settings">
+      <!-- 语速 -->
+      <div class="settings__item">
+        <label>语速</label>
+        <div class="settings__slider">
+          <el-slider v-model="speed" :min="0.5" :max="2" :step="0.1" :show-tooltip="false" />
+          <span class="settings__value">{{ speed.toFixed(1) }}x</span>
+        </div>
+      </div>
+
+      <!-- 音色 -->
+      <div class="settings__item">
+        <label>音色</label>
+        <el-select v-model="voice" placeholder="选择音色">
+          <el-option label="Alex（男声）" value="alex" />
+          <el-option label="Anna（女声）" value="anna" />
+          <el-option label="Bella（女声）" value="bella" />
+          <el-option label="Benjamin（男声）" value="benjamin" />
+        </el-select>
+      </div>
+
+      <!-- 难度 -->
+      <div class="settings__item">
+        <label>难度</label>
+        <el-radio-group v-model="difficulty">
+          <el-radio-button value="easy">初级</el-radio-button>
+          <el-radio-button value="medium">中级</el-radio-button>
+          <el-radio-button value="hard">高级</el-radio-button>
+        </el-radio-group>
+      </div>
+
+      <!-- 纠错开关 -->
+      <div class="settings__item">
+        <label>语法纠错</label>
+        <el-switch v-model="correctionEnabled" />
+      </div>
+
+      <!-- 评分开关 -->
+      <div class="settings__item">
+        <label>发音评分</label>
+        <el-switch v-model="scoringEnabled" />
+      </div>
+    </div>
+  </el-drawer>
+</template>
+
+<script setup>
+import { ref, watch } from 'vue'
+
+const props = defineProps({
+  modelValue: Boolean,
+})
+
+const emit = defineEmits(['update:modelValue', 'change'])
+
+const visible = ref(props.modelValue)
+
+watch(() => props.modelValue, (val) => { visible.value = val })
+watch(visible, (val) => { emit('update:modelValue', val) })
+
+// 设置项，从 localStorage 恢复
+const speed = ref(loadSetting('speed', 1.0))
+const voice = ref(loadSetting('voice', 'alex'))
+const difficulty = ref(loadSetting('difficulty', 'medium'))
+const correctionEnabled = ref(loadSetting('correctionEnabled', true))
+const scoringEnabled = ref(loadSetting('scoringEnabled', true))
+
+/** 从 localStorage 读取设置 */
+function loadSetting(key, defaultVal) {
+  const saved = localStorage.getItem(`setting_${key}`)
+  return saved !== null ? JSON.parse(saved) : defaultVal
+}
+
+/** 保存设置到 localStorage 并通知父组件 */
+watch([speed, voice, difficulty, correctionEnabled, scoringEnabled], () => {
+  const settings = {
+    speed: speed.value,
+    voice: voice.value,
+    difficulty: difficulty.value,
+    correctionEnabled: correctionEnabled.value,
+    scoringEnabled: scoringEnabled.value,
+  }
+
+  // 持久化
+  Object.entries(settings).forEach(([k, v]) => {
+    localStorage.setItem(`setting_${k}`, JSON.stringify(v))
+  })
+
+  emit('change', settings)
+}, { deep: true, flush: 'post' })
+</script>
+
+<style scoped>
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings__item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings__item label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--el-text-color-primary);
+}
+
+.settings__slider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings__slider .el-slider {
+  flex: 1;
+}
+
+.settings__value {
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
+  min-width: 36px;
+  text-align: right;
+}
+</style>

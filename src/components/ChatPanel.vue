@@ -1,6 +1,6 @@
 <template>
-  <div class="chat-panel">
-    <div v-if="messages.length === 0" class="chat-panel__empty">
+  <div class="chat-panel" ref="panelRef">
+    <div v-if="messages.length === 0 && !currentReply" class="chat-panel__empty">
       <el-empty description="按住下方按钮开始对话" :image-size="80" />
     </div>
 
@@ -31,15 +31,35 @@
         </el-card>
       </div>
     </div>
+
+    <!-- 流式回复中 -->
+    <div v-if="currentReply" class="chat-msg chat-msg__ai">
+      <el-avatar :size="32" class="chat-msg__avatar chat-msg__avatar--ai">AI</el-avatar>
+      <el-card shadow="never" class="chat-msg__card chat-msg__card--ai">
+        <p class="typing">{{ currentReply }}<span class="cursor">▊</span></p>
+      </el-card>
+    </div>
   </div>
 </template>
 
 <script setup>
+import { ref, nextTick, watch } from 'vue'
 import { useChatStore } from '../store/chat'
 import { storeToRefs } from 'pinia'
 
 const store = useChatStore()
-const { messages } = storeToRefs(store)
+const { messages, currentReply } = storeToRefs(store)
+const panelRef = ref(null)
+
+// 新消息或流式更新时自动滚动到底部
+watch(
+  () => [messages.value.length, currentReply.value],
+  () => {
+    nextTick(() => {
+      if (panelRef.value) panelRef.value.scrollTop = panelRef.value.scrollHeight
+    })
+  }
+)
 </script>
 
 <style scoped>
@@ -153,5 +173,15 @@ const { messages } = storeToRefs(store)
 .score-feedback {
   font-size: 12px;
   color: #888;
+}
+
+.typing .cursor {
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
 }
 </style>

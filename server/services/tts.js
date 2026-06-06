@@ -11,14 +11,14 @@ const SILICONFLOW_TTS_URL = `${config.SILICONFLOW_BASE_URL}/audio/speech`;
  * @returns {Promise<Buffer|null>} 音频 Buffer，失败返回 null
  */
 async function synthesizeSpeech(text, voice = "alex") {
-  console.log("[TTS] 开始合成, 文本:", text);
+  console.log("[TTS] 开始合成, 文本:", text, "音色:", voice);
 
   try {
     return await retry(async () => {
       const requestBody = {
         model: "FunAudioLLM/CosyVoice2-0.5B",
         input: text,
-        voice: "FunAudioLLM/CosyVoice2-0.5B:alex",
+        voice: `FunAudioLLM/CosyVoice2-0.5B:${voice}`,
         response_format: "mp3",
         stream: false,
       };

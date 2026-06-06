@@ -1,9 +1,14 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+
+const MAX_MESSAGES = 100
 
 export const useChatStore = defineStore('chat', () => {
+  // 当前场景
+  const currentScene = ref(loadFromStorage('currentScene', 'daily'))
+
   // 消息列表
-  const messages = ref([])
+  const messages = ref(loadMessages(currentScene.value))
 
   // 连接与交互状态
   const isConnected = ref(false)
@@ -38,6 +43,11 @@ export const useChatStore = defineStore('chat', () => {
       feedback,
       timestamp: new Date().toLocaleTimeString(),
     })
+    // 超过上限自动清理旧消息
+    if (messages.value.length > MAX_MESSAGES) {
+      messages.value = messages.value.slice(-MAX_MESSAGES)
+    }
+    saveMessages()
   }
 
   /** 获取用于 LLM 的消息历史（最近 10 轮） */
@@ -99,6 +109,11 @@ export const useChatStore = defineStore('chat', () => {
     isPlaying.value = val
   }
 
+  /** 设置处理状态 */
+  function setProcessing(val) {
+    isProcessing.value = val
+  }
+
   /** 设置错误 */
   function setError(msg) {
     error.value = msg
@@ -113,10 +128,31 @@ export const useChatStore = defineStore('chat', () => {
   function clearMessages() {
     messages.value = []
     currentReply.value = ''
+    saveMessages()
+  }
+
+  /** 切换场景 */
+  function switchScene(scene) {
+    currentScene.value = scene
+    saveToStorage('currentScene', scene)
+    messages.value = loadMessages(scene)
+    currentReply.value = ''
+  }
+
+  /** 保存消息到 localStorage */
+  function saveMessages() {
+    const key = `chat_messages_${currentScene.value}`
+    saveToStorage(key, messages.value)
+  }
+
+  /** 从 localStorage 加载消息 */
+  function loadMessages(scene) {
+    return loadFromStorage(`chat_messages_${scene}`, [])
   }
 
   return {
     messages,
+    currentScene,
     isConnected,
     isRecording,
     isProcessing,
@@ -134,8 +170,28 @@ export const useChatStore = defineStore('chat', () => {
     setConnected,
     setRecording,
     setPlaying,
+    setProcessing,
     setError,
     clearError,
     clearMessages,
+    switchScene,
   }
 })
+
+/** localStorage 工具函数 */
+function saveToStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch {
+    // localStorage 满了，忽略
+  }
+}
+
+function loadFromStorage(key, defaultValue) {
+  try {
+    const saved = localStorage.getItem(key)
+    return saved ? JSON.parse(saved) : defaultValue
+  } catch {
+    return defaultValue
+  }
+}

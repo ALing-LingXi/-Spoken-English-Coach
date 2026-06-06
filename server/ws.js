@@ -5,7 +5,7 @@ const {
   createWavHeader,
 } = require("./utils/audio");
 const { recognizeSpeech } = require("./services/asr");
-const { generateReplyStream } = require("./services/llm");
+const { generateReplyStream, getSystemPrompt } = require("./services/llm");
 const { synthesizeSpeech } = require("./services/tts");
 const { parseScore, removeScoreFromReply } = require("./services/scoring");
 
@@ -41,13 +41,19 @@ async function handleAudio(ws, audioBase64, clientMessages) {
   }
   sendMessage(ws, "transcript", { text: transcript });
 
-  // 3. 构建多轮对话消息
-  const messages = buildMessages(clientMessages, transcript);
+  // 3. 构建多轮对话消息（根据难度和场景选择 prompt）
+  const difficulty = ws.settings?.difficulty || "medium";
+  const scene = ws.settings?.scene || "daily";
+  const systemPrompt = getSystemPrompt(difficulty, scene);
+  const messages = buildMessages(clientMessages, transcript, systemPrompt);
 
   // 4. LLM 流式生成回复
   let fullReply = "";
 
-  for await (const chunk of generateReplyStream(messages)) {
+  for await (const chunk of generateReplyStream(
+    messages.messages,
+    messages.systemPrompt,
+  )) {
     if (ws.interrupted) return;
     fullReply += chunk;
     sendMessage(ws, "llm_chunk", { text: chunk });
@@ -75,7 +81,8 @@ async function handleAudio(ws, audioBase64, clientMessages) {
   }
 
   console.log("[WS] 开始调用 TTS...");
-  const ttsBuffer = await synthesizeSpeech(cleanReply);
+  const voice = ws.settings?.voice || "alex";
+  const ttsBuffer = await synthesizeSpeech(cleanReply, voice);
   if (ws.interrupted) return;
   console.log("[WS] TTS 返回 Buffer 大小:", ttsBuffer?.length, "bytes");
   if (!ttsBuffer) {
@@ -91,13 +98,12 @@ async function handleAudio(ws, audioBase64, clientMessages) {
 /**
  * 构建多轮对话消息数组
  */
-function buildMessages(clientMessages, currentTranscript) {
-  // 使用客户端传来的历史消息，追加当前用户输入
+function buildMessages(clientMessages, currentTranscript, systemPrompt) {
   const history = Array.isArray(clientMessages)
     ? clientMessages.slice(-20)
     : [];
   history.push({ role: "user", content: currentTranscript });
-  return history;
+  return { systemPrompt, messages: history };
 }
 
 /**
@@ -138,6 +144,16 @@ function routeMessage(ws, parsed) {
       ws.interrupted = true;
       console.log("[WS] 收到打断请求");
       break;
+    case "setting":
+      // 保存客户端设置
+      ws.settings = { ...ws.settings, ...data };
+      console.log("[WS] 更新设置:", ws.settings);
+      break;
+    case "scene":
+      // 场景切换，保存场景并重置
+      ws.settings = { ...ws.settings, scene: data?.scene };
+      console.log("[WS] 切换场景:", data?.scene);
+      break;
     case "ping":
       // 心跳响应
       sendMessage(ws, "pong", {});
@@ -155,6 +171,9 @@ function createWebSocketServer(server) {
 
   wss.on("connection", (ws) => {
     console.log("[WS] 客户端已连接");
+
+    // 初始化客户端设置
+    ws.settings = { difficulty: "medium", voice: "alex", scene: "daily" };
 
     ws.on("message", (raw) => {
       try {

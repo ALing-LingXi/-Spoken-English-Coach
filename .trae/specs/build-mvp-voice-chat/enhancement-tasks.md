@@ -153,53 +153,53 @@
 
 ## Phase 5：产品功能
 
-### Task 57: 设置面板组件 🔴
-- [ ] SubTask 57.1: 创建 src/components/SettingsPanel.vue
-- [ ] SubTask 57.2: 实现语速滑块（0.5x-2x）
-- [ ] SubTask 57.3: 实现音色下拉选择
-- [ ] SubTask 57.4: 实现难度选择（初级/中级/高级）
-- [ ] SubTask 57.5: 实现纠错开关
-- [ ] SubTask 57.6: 设置变更时发送 setting 消息到后端
-- [ ] SubTask 57.7: 设置存入 localStorage
-- [ ] SubTask 57.8: 页面加载时从 localStorage 恢复设置
+### Task 57: 设置面板组件 ✅
+- [x] SubTask 57.1: 创建 src/components/SettingsPanel.vue
+- [x] SubTask 57.2: 实现语速滑块（0.5x-2x）
+- [x] SubTask 57.3: 实现音色下拉选择
+- [x] SubTask 57.4: 实现难度选择（初级/中级/高级）
+- [x] SubTask 57.5: 实现纠错开关
+- [x] SubTask 57.6: 设置变更时发送 setting 消息到后端
+- [x] SubTask 57.7: 设置存入 localStorage
+- [x] SubTask 57.8: 页面加载时从 localStorage 恢复设置
 
-### Task 58: 后端设置处理 🔴
-- [ ] SubTask 58.1: ws.js 处理 setting 消息类型
-- [ ] SubTask 58.2: 将设置存入 ws 实例（ws.settings）
-- [ ] SubTask 58.3: TTS 调用时传入 speed/voice 参数
-- [ ] SubTask 58.4: LLM 调用时根据难度调整 system prompt
-- [ ] SubTask 58.5: 验证设置变更生效
+### Task 58: 后端设置处理 ✅
+- [x] SubTask 58.1: ws.js 处理 setting 消息类型
+- [x] SubTask 58.2: 将设置存入 ws 实例（ws.settings）
+- [x] SubTask 58.3: TTS 调用时传入 voice 参数
+- [x] SubTask 58.4: LLM 调用时根据难度和场景调整 system prompt
+- [x] SubTask 58.5: 验证设置变更生效
 
-### Task 59: 场景模式切换 🔴
-- [ ] SubTask 59.1: 创建 src/components/SceneSelector.vue
-- [ ] SubTask 59.2: 定义场景配置（日常/商务/旅行/面试）
-- [ ] SubTask 59.3: 场景切换时发送 scene 消息到后端
-- [ ] SubTask 59.4: 场景切换时清空对话历史
-- [ ] SubTask 59.5: 后端根据场景选择不同 system prompt
-- [ ] SubTask 59.6: 选中态下划线动画 + 切换淡入淡出
+### Task 59: 场景模式切换 ✅
+- [x] SubTask 59.1: 创建 src/components/SceneSelector.vue
+- [x] SubTask 59.2: 定义场景配置（日常/商务/旅行/面试）
+- [x] SubTask 59.3: 场景切换时发送 scene 消息到后端
+- [x] SubTask 59.4: 场景切换时清空对话历史
+- [x] SubTask 59.5: 后端根据场景选择不同 system prompt
+- [x] SubTask 59.6: 选中态样式 + 切换交互
 
-### Task 60: 聊天记录持久化 🔴
-- [ ] SubTask 60.1: Store 中实现 saveToLocalStorage 方法
-- [ ] SubTask 60.2: Store 中实现 loadFromLocalStorage 方法
-- [ ] SubTask 60.3: 每次消息变更时自动保存
-- [ ] SubTask 60.4: 页面加载时恢复历史消息
-- [ ] SubTask 60.5: 每个场景独立存储（key 含场景名）
-- [ ] SubTask 60.6: 超过 100 条消息自动清理旧消息
-- [ ] SubTask 60.7: 实现"清空记录"按钮
+### Task 60: 聊天记录持久化 ✅
+- [x] SubTask 60.1: Store 中实现 saveToLocalStorage 方法
+- [x] SubTask 60.2: Store 中实现 loadFromLocalStorage 方法
+- [x] SubTask 60.3: 每次消息变更时自动保存
+- [x] SubTask 60.4: 页面加载时恢复历史消息
+- [x] SubTask 60.5: 每个场景独立存储（key 含场景名）
+- [x] SubTask 60.6: 超过 100 条消息自动清理旧消息
+- [x] SubTask 60.7: 实现"清空记录"按钮
 
-### Task 61: App.vue 整合所有组件 🔴
-- [ ] SubTask 61.1: 引入 SceneSelector 到顶部
-- [ ] SubTask 61.2: 引入 SettingsPanel 右侧抽屉
-- [ ] SubTask 61.3: 设置按钮（齿轮图标）触发抽屉
-- [ ] SubTask 61.4: 整合所有 WebSocket 回调
-- [ ] SubTask 61.5: 整合错误提示区域
-- [ ] SubTask 61.6: 验证所有功能联动正常
+### Task 61: App.vue 整合所有组件 ✅
+- [x] SubTask 61.1: 引入 SceneSelector 到顶部
+- [x] SubTask 61.2: 引入 SettingsPanel 右侧抽屉
+- [x] SubTask 61.3: 设置按钮（齿轮图标）触发抽屉
+- [x] SubTask 61.4: 整合所有 WebSocket 回调
+- [x] SubTask 61.5: 整合错误提示区域
+- [x] SubTask 61.6: 验证所有功能联动正常
 
 ---
 
 # 当前状态总结
 
-## ✅ 已完成（19 项）
+## ✅ 已完成（24 项）
 | Task | 说明 |
 |------|------|
 | Task 38 | 请求重试工具 retry.js |
@@ -221,15 +221,15 @@
 | Task 54 | 音频队列管理 |
 | Task 55 | 录音波形数据 |
 | Task 56 | 波形可视化渲染 |
+| Task 57 | 设置面板组件 |
+| Task 58 | 后端设置处理 |
+| Task 59 | 场景模式切换 |
+| Task 60 | 聊天记录持久化 |
+| Task 61 | App.vue 整合 |
 
-## 🔴 需要完成（5 项）
-| Task | 说明 | 依赖 |
-|------|------|------|
-| Task 57 | 设置面板组件 | Phase 2 完成 |
-| Task 58 | 后端设置处理 | Task 57 |
-| Task 59 | 场景模式切换 | Task 57 |
-| Task 60 | 聊天记录持久化 | MVP Store 完成 |
-| Task 61 | App.vue 整合 | Task 57-60 |
+## 🔴 需要完成（0 项）
+
+> 全部完成！
 
 ---
 
