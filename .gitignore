@@ -1,39 +1,56 @@
-# Logs
-logs
+# ==========================================
+# 1. 硅基流动与核心安全配置 (最重要！保护你的 API Key)
+# ==========================================
+.env
+.env.local
+.env.*.local
+config/secret.js
+config/config.json
+*.pem
+*.key
+
+# ==========================================
+# 2. 前端 Vue3 (Vite) 运行与编译缓存
+# ==========================================
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Log files
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-.DS_Store
-dist
-dist-ssr
-coverage
-*.local
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-*.tsbuildinfo
+# ==========================================
+# 3. 后端 Node.js 运行缓存与本地音频测试文件
+# ==========================================
+# 过滤掉本地录音测试生成的临时音频文件，防止撑爆 GitHub 仓库
+*.mp3
+*.wav
+*.webm
+*.pcm
+/server/uploads/
+/server/temp/
 
-.eslintcache
+# ==========================================
+# 4. LangChain / LangGraph 官方生态模板 (保留并规范化)
+# ==========================================
+# LangGraph
+.langgraph_api/
 
-# Cypress
-/cypress/videos/
-/cypress/screenshots/
-
-# Vitest
-__screenshots__/
-
-# Vite
-*.timestamp-*-*.mjs
+# LangSmith / LangChain Trace 缓存
+.langchain/
+.langsmith/

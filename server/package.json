@@ -1,30 +1,20 @@
 {
-  "name": "ai-english-voice-chat-server",
+  "name": "server",
   "version": "1.0.0",
-  "description": "AI 英语口语陪练后端服务 - WebSocket 语音对话系统",
+  "description": "AI 英语口语陪练后端服务",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
-  "keywords": [
-    "ai",
-    "english",
-    "voice-chat",
-    "websocket",
-    "asr",
-    "llm",
-    "tts"
-  ],
-  "author": "",
-  "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
-    "ws": "^8.14.2",
-    "axios": "^1.6.0",
-    "dotenv": "^16.3.1"
+    "axios": "^1.17.0",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "form-data": "^4.0.0",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.1.14"
   }
 }
