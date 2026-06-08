@@ -16,6 +16,12 @@
 
 ***
 
+## 演示视频
+
+<video src="EnglishMate%20%20.mp4" controls width="100%"></video>
+
+如果 GitHub 页面无法直接播放，请点击下载：[EnglishMate 演示视频](EnglishMate%20%20.mp4)
+
 ## 为什么做 EnglishMate？
 
 练口语最难的是——课本不会回话，语伴不是随时有空。EnglishMate 给你一个**全天候在线的 AI 对话伙伴**：它听你说、用语音回复、实时纠正语法、给出发音评分。按住说话，就这么简单。
