@@ -90,33 +90,16 @@ export const useChatStore = defineStore('chat', () => {
 
   function deleteConversation(id: string): void {
     const idx = conversations.value.findIndex((c) => c.id === id)
-    if (idx === -1) return
+    if (idx <= 0) return
 
     localStorage.removeItem(`chat_conv_${id}`)
     conversations.value.splice(idx, 1)
 
-    if (conversations.value.length === 0) {
-      // 删完了最后一个对话，自动创建新对话
-      const newId = `conv_${Date.now()}`
-      const newConv: Conversation = {
-        id: newId,
-        name: '新对话',
-        scene: 'daily',
-        createdAt: Date.now(),
-      }
-      conversations.value.push(newConv)
-      activeConversationId.value = newId
-      messages.value = []
-      currentReply.value = ''
-      lastCorrection.value = null
-      lastScore.value = null
-      lastFeedback.value = null
-      isProcessing.value = false
-      isPlaying.value = false
-    } else if (activeConversationId.value === id) {
+    if (activeConversationId.value === id) {
       activeConversationId.value = conversations.value[0].id
       messages.value = loadMessagesFromStorage(conversations.value[0].id)
       currentReply.value = ''
+      // 完全清理相关状态
       lastCorrection.value = null
       lastScore.value = null
       lastFeedback.value = null
@@ -127,9 +110,10 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   function getConversationList(): ConversationListItem[] {
-    return conversations.value.map((c) => ({
+    return conversations.value.map((c, i) => ({
       id: c.id,
       name: c.name,
+      isFirst: i === 0,
     }))
   }
 

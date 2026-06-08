@@ -87,6 +87,10 @@ function handleDeleteChat(id: string): void {
   stopPlayer()
   clearQueue()
   deleteConversation(id)
+  // 删除后检查是否只剩默认对话，自动新建以保证良好体验
+  if (chatList.value.length <= 1) {
+    createConversation()
+  }
 }
 
 /** 按下：打断播放或开始录音 */

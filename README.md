@@ -1,3 +1,4 @@
+
 <div align="center">
 
 # EnglishMate
@@ -255,4 +256,4 @@ LLM 被 Prompt 指示在回复中嵌入 `[纠错]...[/纠错]` 和 `[评分]X分
 
 ## 许可证
 
-[MIT](LICENSE) &copy; 2026 林希
+[MIT](LICENSE) © 2026 林希

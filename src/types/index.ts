@@ -33,10 +33,11 @@ export interface Conversation {
   createdAt: number
 }
 
-/** 对话列表项 */
+/** 对话列表项（含 UI 状态） */
 export interface ConversationListItem {
   id: string
   name: string
+  isFirst: boolean
 }
 
 /** LLM 消息格式 */
