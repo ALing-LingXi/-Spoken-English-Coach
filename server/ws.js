@@ -45,15 +45,12 @@ async function handleAudio(ws, audioBase64, clientMessages) {
   const difficulty = ws.settings?.difficulty || "medium";
   const scene = ws.settings?.scene || "daily";
   const systemPrompt = getSystemPrompt(difficulty, scene);
-  const messages = buildMessages(clientMessages, transcript, systemPrompt);
+  const messages = buildMessages(clientMessages, transcript, 'voice');
 
   // 4. LLM 流式生成回复
   let fullReply = "";
 
-  for await (const chunk of generateReplyStream(
-    messages.messages,
-    messages.systemPrompt,
-  )) {
+  for await (const chunk of generateReplyStream(messages, systemPrompt)) {
     if (ws.interrupted) return;
     fullReply += chunk;
     sendMessage(ws, "llm_chunk", { text: chunk });
@@ -97,13 +94,20 @@ async function handleAudio(ws, audioBase64, clientMessages) {
 
 /**
  * 构建多轮对话消息数组
+ * @param {Array} clientMessages - 客户端历史消息
+ * @param {string} currentTranscript - 当前用户输入
+ * @param {string} inputType - 输入类型：'voice' 或 'text'
  */
-function buildMessages(clientMessages, currentTranscript, systemPrompt) {
+function buildMessages(clientMessages, currentTranscript, inputType = 'voice') {
   const history = Array.isArray(clientMessages)
     ? clientMessages.slice(-20)
     : [];
-  history.push({ role: "user", content: currentTranscript });
-  return { systemPrompt, messages: history };
+
+  // 在用户消息中添加输入类型标记，让 LLM 知道是语音还是文字输入
+  const inputTypeLabel = inputType === 'voice' ? '[语音输入]' : '[文字输入]';
+  history.push({ role: 'user', content: `${inputTypeLabel} ${currentTranscript}` });
+
+  return history;
 }
 
 /**
@@ -156,15 +160,12 @@ async function handleText(ws, text, clientMessages) {
   const difficulty = ws.settings?.difficulty || "medium";
   const scene = ws.settings?.scene || "daily";
   const systemPrompt = getSystemPrompt(difficulty, scene);
-  const messages = buildMessages(clientMessages, text, systemPrompt);
+  const messages = buildMessages(clientMessages, text, 'text');
 
   // LLM 流式生成回复
   let fullReply = "";
 
-  for await (const chunk of generateReplyStream(
-    messages.messages,
-    messages.systemPrompt,
-  )) {
+  for await (const chunk of generateReplyStream(messages, systemPrompt)) {
     if (ws.interrupted) return;
     fullReply += chunk;
     sendMessage(ws, "llm_chunk", { text: chunk });
