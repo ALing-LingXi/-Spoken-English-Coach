@@ -103,11 +103,25 @@ function buildMessages(clientMessages, currentTranscript, inputType = 'voice') {
     ? clientMessages.slice(-20)
     : [];
 
-  // 在用户消息中添加输入类型标记，让 LLM 知道是语音还是文字输入
-  const inputTypeLabel = inputType === 'voice' ? '[语音输入]' : '[文字输入]';
-  history.push({ role: 'user', content: `${inputTypeLabel} ${currentTranscript}` });
+  // 处理历史消息，添加输入类型标记
+  const processedHistory = history.map(msg => {
+    // 如果是用户消息且有 inputType，添加标记
+    if (msg.role === 'user' && msg.inputType) {
+      const label = msg.inputType === 'voice' ? '[语音输入]' : '[文字输入]';
+      return { ...msg, content: `${label} ${msg.content}` };
+    }
+    // 如果是用户消息但没有 inputType（旧格式），默认为语音
+    if (msg.role === 'user' && !msg.inputType) {
+      return { ...msg, content: `[语音输入] ${msg.content}` };
+    }
+    return msg;
+  });
 
-  return history;
+  // 添加当前消息
+  const inputTypeLabel = inputType === 'voice' ? '[语音输入]' : '[文字输入]';
+  processedHistory.push({ role: 'user', content: `${inputTypeLabel} ${currentTranscript}` });
+
+  return processedHistory;
 }
 
 /**
@@ -141,7 +155,7 @@ function parseCorrection(text) {
 }
 
 /**
- * 处理文字消息：跳过 ASR，直接 LLM(流式) → TTS
+ * 处理文字消息：跳过 ASR，直接 LLM(流式) → TTS（不评分）
  */
 async function handleText(ws, text, clientMessages) {
   console.log("[WS] 收到文字消息:", text);
@@ -156,10 +170,10 @@ async function handleText(ws, text, clientMessages) {
 
   // 注意：文字消息不发送 transcript，前端已自行显示
 
-  // 构建多轮对话消息
+  // 构建多轮对话消息（文字输入不启用评分）
   const difficulty = ws.settings?.difficulty || "medium";
   const scene = ws.settings?.scene || "daily";
-  const systemPrompt = getSystemPrompt(difficulty, scene);
+  const systemPrompt = getSystemPrompt(difficulty, scene, false);
   const messages = buildMessages(clientMessages, text, 'text');
 
   // LLM 流式生成回复
@@ -178,14 +192,10 @@ async function handleText(ws, text, clientMessages) {
     sendMessage(ws, "correction", { text: correction });
   }
 
-  // 解析评分标记
-  const { score, feedback } = parseScore(reply);
-  if (score) {
-    sendMessage(ws, "score", { score, feedback });
-  }
+  // 文字输入不进行评分
 
   // TTS 合成语音
-  const cleanReply = removeScoreFromReply(reply);
+  const cleanReply = reply;
   if (!cleanReply) {
     sendMessage(ws, "error", { message: "LLM 回复为空" });
     return;

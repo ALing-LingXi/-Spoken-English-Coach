@@ -43,6 +43,7 @@ export interface ConversationListItem {
 export interface LLMessage {
   role: 'user' | 'assistant'
   content: string
+  inputType?: InputType  // 用户消息的输入类型
 }
 
 /** WebSocket 消息类型 */

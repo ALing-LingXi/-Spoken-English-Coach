@@ -1,26 +1,30 @@
 const axios = require('axios');
 const config = require('../config');
 const { retry } = require('../utils/retry');
-const { getScoringPrompt } = require('./scoring');
 
 const SILICONFLOW_LLM_URL = `${config.SILICONFLOW_BASE_URL}/chat/completions`;
 
-const DEFAULT_SYSTEM_PROMPT = `你是一个友好的英语口语陪练助手。请用英语回复用户，保持对话自然流畅。
-如果用户用中文说话，用英语回复并适当纠正表达。
-回复尽量简短，每次2-3句话，鼓励用户继续对话。
+const DEFAULT_SYSTEM_PROMPT_BASE = `你是英语口语陪练助手。用英语回复用户，保持对话自然。
 
-【输入类型说明】
-用户消息会标注输入类型：
-- [语音输入] 表示用户通过语音说话，可能存在发音问题，请关注发音和口语表达
-- [文字输入] 表示用户通过键盘输入，可能存在拼写或语法问题，请关注书面表达
+规则：
+1. 回复简洁，每次1-3句
+2. 用户说中文时，用英语回复并鼓励
+3. 用户消息开头的[语音输入]或[文字输入]是系统标记，忽略它，回复用户实际内容
 
-【语法纠错规则】
-如果用户的英语有语法或表达错误，请在回复末尾用 [纠错]...[/纠错] 标注纠正内容。
-格式：[纠错]错误表达 → 正确表达（简要说明）[/纠错]
-示例：用户说 "I goes to school"，回复末尾加 [纠错]I goes → I go（主语I用动词原形）[/纠错]
-如果没有错误，不需要加纠错标记。
+纠错：用户有语法错误时，回复末尾加[纠错]错误→正确[/纠错]`;
 
-${getScoringPrompt()}`;
+function getScoringPrompt() {
+  return `
+
+【评分】
+根据用户的英语表达给出1-5分评分：
+1分=难以理解，2分=错误较多，3分=基本流畅，4分=自然流畅，5分=接近母语
+
+在回复末尾添加评分，格式：[评分]3分：简短评语[/评分]
+注意：数字和"分"之间不要重复。`;
+}
+
+const DEFAULT_SYSTEM_PROMPT = DEFAULT_SYSTEM_PROMPT_BASE + getScoringPrompt();
 
 /** 难度对应的 prompt 补充 */
 const DIFFICULTY_PROMPTS = {
@@ -41,10 +45,15 @@ const SCENE_PROMPTS = {
  * 根据难度和场景生成 system prompt
  * @param {string} difficulty - easy/medium/hard
  * @param {string} scene - daily/business/travel/interview
+ * @param {boolean} enableScoring - 是否启用评分（文字输入不评分）
  * @returns {string}
  */
-function getSystemPrompt(difficulty = 'medium', scene = 'daily') {
-  let prompt = DEFAULT_SYSTEM_PROMPT;
+function getSystemPrompt(difficulty = 'medium', scene = 'daily', enableScoring = true) {
+  let prompt = DEFAULT_SYSTEM_PROMPT_BASE;
+
+  if (enableScoring) {
+    prompt += getScoringPrompt();
+  }
 
   const difficultyExtra = DIFFICULTY_PROMPTS[difficulty] || '';
   if (difficultyExtra) prompt += '\n\n' + difficultyExtra;
@@ -60,12 +69,15 @@ function getSystemPrompt(difficulty = 'medium', scene = 'daily') {
  */
 function buildRequestBody(messages, stream, systemPrompt) {
   return {
-    model: 'Qwen/Qwen2.5-7B-Instruct',
+    model: 'Qwen/Qwen2.5-14B-Instruct',  // 使用更强的模型
     messages: [
       { role: 'system', content: systemPrompt || DEFAULT_SYSTEM_PROMPT },
       ...messages,
     ],
     stream,
+    temperature: 0.7,      // 降低随机性
+    max_tokens: 500,       // 限制回复长度
+    top_p: 0.9,
   };
 }
 
