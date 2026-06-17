@@ -1,6 +1,9 @@
 /** 消息角色 */
 export type MessageRole = 'user' | 'assistant'
 
+/** 输入类型 */
+export type InputType = 'voice' | 'text'
+
 /** 场景类型 */
 export type SceneType = 'daily' | 'business' | 'travel' | 'interview'
 
@@ -15,6 +18,7 @@ export interface ChatMessage {
   id: number
   role: MessageRole
   content: string
+  inputType: InputType
   correction: string | null
   score: number | null
   feedback: string | null
@@ -40,6 +44,7 @@ export interface ConversationListItem {
 export interface LLMessage {
   role: 'user' | 'assistant'
   content: string
+  inputType?: InputType  // 用户消息的输入类型
 }
 
 /** WebSocket 消息类型 */

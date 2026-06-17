@@ -126,7 +126,7 @@ async function handleStop(): Promise<void> {
 /** 处理语音识别结果 */
 function handleTranscript(data: unknown): void {
   const d = data as TranscriptData
-  addMessage('user', d.text)
+  store.addMessage('user', d.text, 'voice')
   store.startReply()
 }
 

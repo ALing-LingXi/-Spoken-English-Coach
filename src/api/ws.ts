@@ -11,6 +11,7 @@ const MAX_RETRIES = 10
 const BASE_DELAY = 1000
 let retryCount = 0
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+let isReconnecting = false
 
 // 心跳参数
 const HEARTBEAT_INTERVAL = 30000
@@ -71,6 +72,7 @@ function connectWebSocket(): Promise<WebSocket> {
     socket.onopen = () => {
       console.log('[WS] 已连接')
       retryCount = 0
+      isReconnecting = false
       emit('open', null)
       startHeartbeat()
       resolve(socket!)
@@ -106,12 +108,14 @@ function connectWebSocket(): Promise<WebSocket> {
 
 /** 指数退避重连 */
 function scheduleReconnect(): void {
+  if (isReconnecting) return
   if (retryCount >= MAX_RETRIES) {
     console.error('[WS] 达到最大重试次数，停止重连')
     emit('reconnect_failed', null)
     return
   }
 
+  isReconnecting = true
   const delay = BASE_DELAY * Math.pow(2, retryCount)
   retryCount++
   console.log(`[WS] ${delay}ms 后进行第 ${retryCount} 次重连...`)
@@ -119,6 +123,7 @@ function scheduleReconnect(): void {
   reconnectTimer = setTimeout(() => {
     connectWebSocket().catch(() => {
       // 连接失败，onclose 会触发下一次重连
+      isReconnecting = false
     })
   }, delay)
 }
@@ -130,6 +135,7 @@ function stopReconnect(): void {
     reconnectTimer = null
   }
   retryCount = 0
+  isReconnecting = false
 }
 
 /** 发送消息到服务器 */

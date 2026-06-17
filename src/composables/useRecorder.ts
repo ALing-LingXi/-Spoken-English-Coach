@@ -83,6 +83,7 @@ export function useRecorder() {
       const duration = Date.now() - recordingStartTime
       if (duration < MIN_RECORDING_DURATION) {
         mediaRecorder.value.onstop = null
+        mediaRecorder.value.stop()
         mediaRecorder.value.stream.getTracks().forEach((t) => t.stop())
         mediaRecorder.value = null
         store.setRecording(false)

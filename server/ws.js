@@ -45,15 +45,12 @@ async function handleAudio(ws, audioBase64, clientMessages) {
   const difficulty = ws.settings?.difficulty || "medium";
   const scene = ws.settings?.scene || "daily";
   const systemPrompt = getSystemPrompt(difficulty, scene);
-  const messages = buildMessages(clientMessages, transcript, systemPrompt);
+  const messages = buildMessages(clientMessages, transcript, 'voice');
 
   // 4. LLM 流式生成回复
   let fullReply = "";
 
-  for await (const chunk of generateReplyStream(
-    messages.messages,
-    messages.systemPrompt,
-  )) {
+  for await (const chunk of generateReplyStream(messages, systemPrompt)) {
     if (ws.interrupted) return;
     fullReply += chunk;
     sendMessage(ws, "llm_chunk", { text: chunk });
@@ -97,37 +94,68 @@ async function handleAudio(ws, audioBase64, clientMessages) {
 
 /**
  * 构建多轮对话消息数组
+ * @param {Array} clientMessages - 客户端历史消息
+ * @param {string} currentTranscript - 当前用户输入
+ * @param {string} inputType - 输入类型：'voice' 或 'text'
  */
-function buildMessages(clientMessages, currentTranscript, systemPrompt) {
+function buildMessages(clientMessages, currentTranscript, inputType = 'voice') {
   const history = Array.isArray(clientMessages)
     ? clientMessages.slice(-20)
     : [];
-  history.push({ role: "user", content: currentTranscript });
-  return { systemPrompt, messages: history };
+
+  // 处理历史消息，添加输入类型标记
+  const processedHistory = history.map(msg => {
+    // 如果是用户消息且有 inputType，添加标记
+    if (msg.role === 'user' && msg.inputType) {
+      const label = msg.inputType === 'voice' ? '[语音输入]' : '[文字输入]';
+      return { ...msg, content: `${label} ${msg.content}` };
+    }
+    // 如果是用户消息但没有 inputType（旧格式），默认为语音
+    if (msg.role === 'user' && !msg.inputType) {
+      return { ...msg, content: `[语音输入] ${msg.content}` };
+    }
+    return msg;
+  });
+
+  // 添加当前消息
+  const inputTypeLabel = inputType === 'voice' ? '[语音输入]' : '[文字输入]';
+  processedHistory.push({ role: 'user', content: `${inputTypeLabel} ${currentTranscript}` });
+
+  return processedHistory;
 }
 
 /**
  * 解析纠错标记，分离正文和纠错内容
+ * 支持有闭合标签和无闭合标签两种情况（LLM 经常漏掉闭合标签）
  * @param {string} text - LLM 完整回复
  * @returns {{ reply: string, correction: string|null }}
  */
 function parseCorrection(text) {
-  const regex = /\[纠错\]([\s\S]*?)\[\/纠错\]/;
-  const match = text.match(regex);
+  // 优先匹配有闭合标签的格式
+  const regexWithClose = /\[纠错\]([\s\S]*?)\[\/纠错\]/;
+  const matchWithClose = text.match(regexWithClose);
 
-  if (!match) {
-    return { reply: text.trim(), correction: null };
+  if (matchWithClose) {
+    const reply = text.replace(regexWithClose, '').trim();
+    const correction = matchWithClose[1].trim();
+    return { reply, correction };
   }
 
-  // 正文去掉纠错标记部分
-  const reply = text.replace(regex, "").trim();
-  const correction = match[1].trim();
+  // 兜底：匹配无闭合标签的格式
+  const regexNoClose = /\[纠错\]([\s\S]*?)$/;
+  const matchNoClose = text.match(regexNoClose);
 
-  return { reply, correction };
+  if (matchNoClose) {
+    const reply = text.replace(regexNoClose, '').trim();
+    const correction = matchNoClose[1].trim();
+    return { reply, correction };
+  }
+
+  return { reply: text.trim(), correction: null };
 }
 
 /**
- * 处理文字消息：跳过 ASR，直接 LLM(流式) → TTS
+ * 处理文字消息：跳过 ASR，直接 LLM(流式) → TTS（不评分）
  */
 async function handleText(ws, text, clientMessages) {
   console.log("[WS] 收到文字消息:", text);
@@ -142,19 +170,16 @@ async function handleText(ws, text, clientMessages) {
 
   // 注意：文字消息不发送 transcript，前端已自行显示
 
-  // 构建多轮对话消息
+  // 构建多轮对话消息（文字输入不启用评分）
   const difficulty = ws.settings?.difficulty || "medium";
   const scene = ws.settings?.scene || "daily";
-  const systemPrompt = getSystemPrompt(difficulty, scene);
-  const messages = buildMessages(clientMessages, text, systemPrompt);
+  const systemPrompt = getSystemPrompt(difficulty, scene, false);
+  const messages = buildMessages(clientMessages, text, 'text');
 
   // LLM 流式生成回复
   let fullReply = "";
 
-  for await (const chunk of generateReplyStream(
-    messages.messages,
-    messages.systemPrompt,
-  )) {
+  for await (const chunk of generateReplyStream(messages, systemPrompt)) {
     if (ws.interrupted) return;
     fullReply += chunk;
     sendMessage(ws, "llm_chunk", { text: chunk });
@@ -167,14 +192,10 @@ async function handleText(ws, text, clientMessages) {
     sendMessage(ws, "correction", { text: correction });
   }
 
-  // 解析评分标记
-  const { score, feedback } = parseScore(reply);
-  if (score) {
-    sendMessage(ws, "score", { score, feedback });
-  }
+  // 文字输入不进行评分
 
   // TTS 合成语音
-  const cleanReply = removeScoreFromReply(reply);
+  const cleanReply = reply;
   if (!cleanReply) {
     sendMessage(ws, "error", { message: "LLM 回复为空" });
     return;

@@ -4,6 +4,7 @@ import type {
   ChatMessage,
   Conversation,
   ConversationListItem,
+  InputType,
   LLMessage,
   MessageRole,
   SceneType,
@@ -82,6 +83,8 @@ export const useChatStore = defineStore('chat', () => {
     lastCorrection.value = null
     lastScore.value = null
     lastFeedback.value = null
+    isProcessing.value = false
+    isPlaying.value = false
     persistConversations()
   }
 
@@ -119,6 +122,7 @@ export const useChatStore = defineStore('chat', () => {
   function addMessage(
     role: MessageRole,
     content: string,
+    inputType: InputType = 'text',
     correction: string | null = null,
     score: number | null = null,
     feedback: string | null = null,
@@ -127,6 +131,7 @@ export const useChatStore = defineStore('chat', () => {
       id: Date.now(),
       role,
       content,
+      inputType,
       correction,
       score,
       feedback,
@@ -142,6 +147,7 @@ export const useChatStore = defineStore('chat', () => {
     return messages.value.slice(-20).map((m) => ({
       role: m.role === 'user' ? 'user' : 'assistant',
       content: m.content,
+      inputType: m.role === 'user' ? m.inputType : undefined,
     }))
   }
 
@@ -159,6 +165,7 @@ export const useChatStore = defineStore('chat', () => {
       addMessage(
         'assistant',
         currentReply.value,
+        'voice',
         lastCorrection.value,
         lastScore.value,
         lastFeedback.value,

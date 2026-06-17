@@ -1,5 +1,4 @@
 
-
 <div align="center">
 
 # EnglishMate
@@ -14,7 +13,7 @@
 
 </div>
 
-***
+---
 
 ## 演示视频
 
@@ -108,17 +107,17 @@ Pinia 提供简洁的响应式状态管理和 TypeScript 支持。localStorage �
 
 ## 技术栈
 
-| 层级     | 技术                  | 用途                  |
-| ------ | ------------------- | ------------------- |
-| 前端     | Vue 3 + TypeScript  | 响应式 UI 框架           |
-| 状态管理   | Pinia               | 集中式状态管理             |
-| UI 组件库 | Element Plus        | 滑块、开关、单选等组件         |
-| 构建工具   | Vite                | 快速开发服务器 + WS 代理     |
-| 后端     | Express + ws        | HTTP + WebSocket 服务 |
-| 语音识别   | SenseVoice Small    | 语音转文字               |
-| 大语言模型  | Qwen2.5-7B-Instruct | 对话 + 纠错 + 评分        |
-| 语音合成   | CosyVoice2-0.5B     | 文字转语音               |
-| API 平台 | SiliconFlow         | 统一 AI 服务提供商         |
+| 层级 | 技术 | 用途 |
+|------|------|------|
+| 前端 | Vue 3 + TypeScript | 响应式 UI 框架 |
+| 状态管理 | Pinia | 集中式状态管理 |
+| UI 组件库 | Element Plus | 滑块、开关、单选等组件 |
+| 构建工具 | Vite | 快速开发服务器 + WS 代理 |
+| 后端 | Express + ws | HTTP + WebSocket 服务 |
+| 语音识别 | SenseVoice Small | 语音转文字 |
+| 大语言模型 | Qwen2.5-7B-Instruct | 对话 + 纠错 + 评分 |
+| 语音合成 | CosyVoice2-0.5B | 文字转语音 |
+| API 平台 | SiliconFlow | 统一 AI 服务提供商 |
 
 ## 数据流
 

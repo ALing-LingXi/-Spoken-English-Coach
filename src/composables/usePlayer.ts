@@ -6,6 +6,9 @@ export function usePlayer() {
   const currentAudio = ref<HTMLAudioElement | null>(null)
   const queue = ref<string[]>([])
 
+  /** 当前播放音频的 ObjectURL，用于释放 */
+  let currentUrl: string | null = null
+
   /** base64 转 Audio URL */
   function base64ToAudioUrl(base64Audio: string): string {
     const binary = atob(base64Audio)
@@ -24,6 +27,7 @@ export function usePlayer() {
       stopCurrent()
 
       const url = base64ToAudioUrl(base64Audio)
+      currentUrl = url
       const audio = new Audio(url)
       currentAudio.value = audio
       store.setPlaying(true)
@@ -31,24 +35,32 @@ export function usePlayer() {
       audio.onended = () => {
         store.setPlaying(false)
         currentAudio.value = null
-        URL.revokeObjectURL(url)
+        revokeCurrentUrl()
         resolve()
       }
 
       audio.onerror = () => {
         store.setPlaying(false)
         currentAudio.value = null
-        URL.revokeObjectURL(url)
+        revokeCurrentUrl()
         resolve()
       }
 
       audio.play().catch(() => {
         store.setPlaying(false)
         currentAudio.value = null
-        URL.revokeObjectURL(url)
+        revokeCurrentUrl()
         resolve()
       })
     })
+  }
+
+  /** 释放当前 ObjectURL */
+  function revokeCurrentUrl(): void {
+    if (currentUrl) {
+      URL.revokeObjectURL(currentUrl)
+      currentUrl = null
+    }
   }
 
   /** 停止当前播放（不清队列） */
@@ -61,6 +73,7 @@ export function usePlayer() {
       currentAudio.value.currentTime = 0
       currentAudio.value = null
     }
+    revokeCurrentUrl()
     store.setPlaying(false)
   }
 
@@ -91,7 +104,11 @@ export function usePlayer() {
 
     const next = queue.value.shift()!
     await playAudio(next)
-    playNext()
+    // 播放完成后继续下一条（如果未被停止）
+    const store = useChatStore()
+    if (!store.isPlaying && queue.value.length > 0) {
+      playNext()
+    }
   }
 
   /** 清空队列 */
